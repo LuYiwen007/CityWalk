@@ -9,6 +9,7 @@ class MessageViewModel: ObservableObject {
     
     private let qianwenService: QianwenService
     private var lastBotText: String = ""
+    private var currentBotText: String = ""
     
     init(qianwenService: QianwenService = .shared) {
         self.qianwenService = qianwenService
@@ -34,21 +35,19 @@ class MessageViewModel: ObservableObject {
         inputText = ""
         isLoading = true
         lastBotText = ""
+        currentBotText = ""
         
         qianwenService.streamMessage(
             query: userInput,
             onReceive: { [weak self] text in
                 Task { @MainActor in
                     guard let self = self else { return }
-                    // 只在text非空且与上次不同才更新
-                    if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, text != self.lastBotText {
-                        self.lastBotText = text
-                        if let lastMessage = self.messages.last {
-                            var updatedMessage = lastMessage
-                            updatedMessage.content = text
-                            if let index = self.messages.lastIndex(where: { $0.id == lastMessage.id }) {
-                                self.messages[index] = updatedMessage
-                            }
+                    self.currentBotText += text
+                    if let lastMessage = self.messages.last {
+                        var updatedMessage = lastMessage
+                        updatedMessage.content = self.currentBotText
+                        if let index = self.messages.lastIndex(where: { $0.id == lastMessage.id }) {
+                            self.messages[index] = updatedMessage
                         }
                     }
                 }
@@ -58,6 +57,7 @@ class MessageViewModel: ObservableObject {
                     guard let self = self else { return }
                     self.isLoading = false
                     self.lastBotText = ""
+                    self.currentBotText = ""
                     if let error = error {
                         let errorMessage: String
                         switch error {

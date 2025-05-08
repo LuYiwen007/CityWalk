@@ -136,17 +136,19 @@ class QianwenService {
                 var receivedAnyData = false
                 
                 for line in lines {
-                    guard !line.isEmpty else { continue }
-                    if line.hasPrefix("data: ") {
-                        let jsonString = String(line.dropFirst(6))
-                        if let jsonData = jsonString.data(using: .utf8),
-                           let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
-                           let output = json["output"] as? [String: Any],
-                           let text = output["text"] as? String,
-                           !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            receivedAnyData = true
-                            DispatchQueue.main.async {
-                                onReceive(text)
+                    guard !line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
+                    if line.hasPrefix("data:") {
+                        let jsonString = String(line.dropFirst(5)) // "data:" 长度为5
+                        if let jsonData = jsonString.data(using: .utf8) {
+                            if let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+                                if let output = json["output"] as? [String: Any] {
+                                    if let text = output["text"] as? String {
+                                        receivedAnyData = true
+                                        DispatchQueue.main.async {
+                                            onReceive(text)
+                                        }
+                                    }
+                                } 
                             }
                         }
                     }
