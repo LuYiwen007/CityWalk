@@ -10,10 +10,15 @@ enum QianwenError: Error {
 }
 
 // 通义千问服务，负责与阿里云通义千问API进行网络通信
-class QianwenService {
+class QianwenService: NSObject, URLSessionDataDelegate {
     static let shared = QianwenService() // 单例
     
-    private init() {}
+    private var receivedData: Data = Data()
+    private var dataTask: URLSessionDataTask?
+    private var onReceive: ((String) -> Void)?
+    private var onComplete: ((Error?) -> Void)?
+    
+    private override init() {}
     
     private let apiKey = "sk-7c54a7c880bc41c29bb571fd2c348488" // API密钥
     private let baseURL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation" // API基础地址
@@ -71,6 +76,10 @@ class QianwenService {
         onReceive: @escaping (String) -> Void,
         onComplete: @escaping (Error?) -> Void
     ) {
+        self.onReceive = onReceive
+        self.onComplete = onComplete
+        self.receivedData = Data()
+        
         let endpoint = baseURL
         guard let url = URL(string: endpoint) else {
             onComplete(QianwenError.invalidURL)
@@ -106,67 +115,49 @@ class QianwenService {
             print("Request Headers: \(request.allHTTPHeaderFields ?? [:])")
             print("Request Body: \(String(data: jsonData, encoding: .utf8) ?? "")")
             
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    print("Network error: \(error.localizedDescription)")
-                    onComplete(QianwenError.networkError(error))
-                    return
-                }
-                
-                if let httpResponse = response as? HTTPURLResponse {
-                    print("Response status code: \(httpResponse.statusCode)")
-                    
-                    if httpResponse.statusCode == 401 {
-                        print("Unauthorized: Check your API key")
-                        onComplete(QianwenError.unauthorized)
-                        return
-                    }
-                }
-                
-                guard let data = data else {
-                    print("No data received")
-                    onComplete(QianwenError.invalidResponse)
-                    return
-                }
-                
-                let responseString = String(data: data, encoding: .utf8) ?? ""
-                print("Raw response: \(responseString)")
-                
-                let lines = responseString.components(separatedBy: "\n")
-                var receivedAnyData = false
-                
-                for line in lines {
-                    guard !line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
-                    if line.hasPrefix("data:") {
-                        let jsonString = String(line.dropFirst(5)) // "data:" 长度为5
-                        if let jsonData = jsonString.data(using: .utf8) {
-                            if let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
-                                if let output = json["output"] as? [String: Any] {
-                                    if let text = output["text"] as? String {
-                                        receivedAnyData = true
-                                        DispatchQueue.main.async {
-                                            onReceive(text)
-                                        }
-                                    }
-                                } 
-                            }
-                        }
-                    }
-                }
-                
-                if !receivedAnyData {
-                    print("No valid data found in response")
-                    onComplete(nil)
-                } else {
-                    onComplete(nil)
-                }
-            }
-            
-            task.resume()
+            let session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
+            dataTask = session.dataTask(with: request)
+            dataTask?.resume()
             
         } catch {
             print("JSON serialization error: \(error)")
             onComplete(error)
         }
+    }
+    
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        receivedData.append(data)
+        
+        if let string = String(data: data, encoding: .utf8) {
+            let lines = string.components(separatedBy: "\n")
+            for line in lines {
+                guard !line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
+                if line.hasPrefix("data:") {
+                    let jsonString = String(line.dropFirst(5))
+                    if let jsonData = jsonString.data(using: .utf8),
+                       let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
+                       let output = json["output"] as? [String: Any],
+                       let text = output["text"] as? String {
+                        DispatchQueue.main.async {
+                            self.onReceive?(text)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let error = error {
+            self.onComplete?(QianwenError.networkError(error))
+        } else {
+            self.onComplete?(nil)
+        }
+        
+        // 清理资源
+        self.receivedData = Data()
+        self.onReceive = nil
+        self.onComplete = nil
+        self.dataTask = nil
     }
 } 
