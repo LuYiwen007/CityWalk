@@ -7,6 +7,7 @@
 
 import Testing
 @testable import CityWalk
+import CoreLocation
 
 struct CityWalkTests {
 

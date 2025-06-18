@@ -18,16 +18,16 @@ struct MainTabView: View {
             Group {
                 switch selectedTab {
                 case 0:
-                    // 社区页面（空白）
-                    CommunityView()
+                    // 行程页面
+                    TripView()
                         .padding(.bottom, tabBarHeight)
                 case 1:
                     // 聊天页面
                     MessageView(sharedMapState: sharedMapState)
                         .padding(.bottom, tabBarHeight)
                 case 2:
-                    // 我的页面
-                    MyPageView()
+                    // 社区页面
+                    CommunityView()
                         .padding(.bottom, tabBarHeight)
                 default:
                     MessageView(sharedMapState: sharedMapState)
@@ -37,7 +37,7 @@ struct MainTabView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             // 底部Tab栏
             HStack {
-                TabBarButton(title: "社区", systemImage: "person.3.fill", selected: selectedTab == 0) {
+                TabBarButton(title: "行程", systemImage: "suitcase.fill", selected: selectedTab == 0) {
                     selectedTab = 0
                 }
                 Spacer()
@@ -45,7 +45,7 @@ struct MainTabView: View {
                     selectedTab = 1
                 }
                 Spacer()
-                TabBarButton(title: "我的", systemImage: "person.crop.circle", selected: selectedTab == 2) {
+                TabBarButton(title: "社区", systemImage: "person.3.fill", selected: selectedTab == 2) {
                     selectedTab = 2
                 }
             }
@@ -87,10 +87,5 @@ struct MyPageView: View {
     }
 }
 
-// 新增社区空白页面
-struct CommunityView: View {
-    var body: some View {
-        Color(.systemGroupedBackground)
-            .ignoresSafeArea()
-    }
-} 
+// 引入新社区页面UI
+// CommunityView 已在 Views 文件夹单独实现 

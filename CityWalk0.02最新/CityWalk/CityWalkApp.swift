@@ -8,12 +8,17 @@
 import SwiftUI
 import SwiftData
 import AMapFoundationKit
+import AMapSearchKit
+import AMapLocationKit
 
 // 新增AppDelegate类用于高德Key初始化
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        AMapServices.updatePrivacyShow(true, privacyInfo: true) // 新增：同意展示隐私政策
-        AMapServices.updatePrivacyAgree(true) // 新增：同意隐私政策
+        // 新版高德SDK隐私合规接口，必须在任何高德SDK对象初始化前调用
+        AMapLocationManager.updatePrivacyShow(.didShow, privacyInfo: .didContain)
+        AMapLocationManager.updatePrivacyAgree(.didAgree)
+        AMapSearchAPI.updatePrivacyShow(.didShow, privacyInfo: .didContain)
+        AMapSearchAPI.updatePrivacyAgree(.didAgree)
         AMapServices.shared().apiKey = "ea6ffe534577fb90a8ce52a72c0aa121"
         return true
     }

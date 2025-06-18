@@ -60,45 +60,45 @@ struct MessageView: View {
             }
             // 聊天主页面
             if showChat {
-                VStack(spacing: 0) {
+        VStack(spacing: 0) {
                     // 顶部栏
-                    HStack {
-                        Button(action: {
+            HStack {
+                Button(action: {
                             withAnimation { showProfileDrawer = true }
-                        }) {
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.blue)
-                        }
-                        Spacer()
-                        Text("聊天")
-                            .font(.system(size: settings.fontSize))
-                        Spacer()
-                        Button(action: {
-                            showSettings = true
-                        }) {
-                            Image(systemName: "gearshape.fill")
-                                .resizable()
-                                .frame(width: 25, height: 25)
-                                .foregroundColor(.gray)
-                        }
-                        .sheet(isPresented: $showSettings) {
-                            SettingsView(isShowingSettings: $showSettings)
-                        }
-                    }
-                    .padding()
-                    .background(Color(.systemBackground))
-                    .shadow(radius: 1)
+                }) {
+                    Image(systemName: "person.circle.fill")
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                        .foregroundColor(.blue)
+                }
+                Spacer()
+                Text("聊天")
+                    .font(.system(size: settings.fontSize))
+                Spacer()
+                Button(action: {
+                    showSettings = true
+                }) {
+                    Image(systemName: "gearshape.fill")
+                        .resizable()
+                        .frame(width: 25, height: 25)
+                        .foregroundColor(.gray)
+                }
+                .sheet(isPresented: $showSettings) {
+                    SettingsView(isShowingSettings: $showSettings)
+                }
+            }
+            .padding()
+            .background(Color(.systemBackground))
+            .shadow(radius: 1)
                     // 聊天消息区
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            LazyVStack(spacing: 12) {
-                                ForEach(viewModel.messages) { message in
-                                    MessageBubble(message: message)
-                                        .id(message.id)
-                                        .environment(\.fontSize, settings.fontSize)
-                                        .environment(\.language, settings.language)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(viewModel.messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
+                                .environment(\.fontSize, settings.fontSize)
+                                .environment(\.language, settings.language)
                                     // 如果是推荐线路消息，展示确认按钮
                                     if message.isRouteRecommendation {
                                         Button(action: {
@@ -119,19 +119,19 @@ struct MessageView: View {
                                         }
                                         .padding(.bottom, 8)
                                     }
-                                }
-                            }
-                            .padding()
-                        }
-                        .frame(maxHeight: mapHeight > 0 ? UIScreen.main.bounds.height * 0.5 : .infinity)
-                        .onChange(of: viewModel.messages.count) { _ in
-                            if let lastMessage = viewModel.messages.last {
-                                withAnimation {
-                                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                                }
-                            }
                         }
                     }
+                    .padding()
+                }
+                .frame(maxHeight: mapHeight > 0 ? UIScreen.main.bounds.height * 0.5 : .infinity)
+                .onChange(of: viewModel.messages.count) { _ in
+                    if let lastMessage = viewModel.messages.last {
+                        withAnimation {
+                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                        }
+                    }
+                }
+            }
                     // "回到地图"按钮
                     Button(action: {
                         withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
@@ -153,14 +153,14 @@ struct MessageView: View {
                     }
                     .padding(.top, 8)
                     // 输入区
-                    HStack(spacing: 12) {
-                        Button(action: {
+            HStack(spacing: 12) {
+                Button(action: {
                             showPhotoActionSheet = true
-                        }) {
+                }) {
                             Image(systemName: "plus")
-                                .foregroundColor(.blue)
-                                .frame(width: 32, height: 32)
-                        }
+                        .foregroundColor(.blue)
+                        .frame(width: 32, height: 32)
+                }
                         .actionSheet(isPresented: $showPhotoActionSheet) {
                             ActionSheet(title: Text("选择操作"), buttons: [
                                 .default(Text("拍照")) {
@@ -174,25 +174,25 @@ struct MessageView: View {
                                 .cancel()
                             ])
                         }
-                        TextField(settings.language == "简体中文" ? "发送消息..." : "Send message...", text: $viewModel.inputText)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.system(size: settings.fontSize))
-                            .onSubmit {
-                                viewModel.sendMessage()
-                            }
-                        Button(action: {
-                            viewModel.sendMessage()
-                        }) {
-                            Image(systemName: "arrow.up.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.blue)
-                        }
-                        .disabled(viewModel.isLoading)
+                TextField(settings.language == "简体中文" ? "发送消息..." : "Send message...", text: $viewModel.inputText)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .font(.system(size: settings.fontSize))
+                    .onSubmit {
+                        viewModel.sendMessage()
                     }
+                Button(action: {
+                    viewModel.sendMessage()
+                }) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                        .foregroundColor(.blue)
+                }
+                .disabled(viewModel.isLoading)
+            }
                     .padding(.horizontal)
                     .padding(.bottom, 8)
-                    .background(Color(.systemBackground))
+            .background(Color(.systemBackground))
                     .cornerRadius(0, corners: [.bottomLeft, .bottomRight])
                     .cornerRadius(18, corners: [.topLeft, .topRight])
                     .overlay(
@@ -201,7 +201,7 @@ struct MessageView: View {
                             .foregroundColor(Color(.systemGray4)),
                         alignment: .bottom
                     )
-                    .shadow(radius: 1)
+            .shadow(radius: 1)
                     .frame(maxWidth: .infinity)
                     .sheet(isPresented: $showImagePicker) {
                         ImagePicker(sourceType: imagePickerSource) { image in
@@ -356,12 +356,12 @@ struct MessageBubble: View {
                             .frame(maxWidth: 180, maxHeight: 180)
                             .cornerRadius(12)
                     } else {
-                        Text(message.content)
-                            .font(.system(size: fontSize))
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                    Text(message.content)
+                        .font(.system(size: fontSize))
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
                     Text(formatTime(message.timestamp))
                         .font(.system(size: fontSize - 4))
@@ -376,11 +376,11 @@ struct MessageBubble: View {
                             .frame(maxWidth: 180, maxHeight: 180)
                             .cornerRadius(12)
                     } else {
-                        Text(message.content)
-                            .font(.system(size: fontSize))
-                            .padding()
-                            .background(Color(.systemGray5))
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                    Text(message.content)
+                        .font(.system(size: fontSize))
+                        .padding()
+                        .background(Color(.systemGray5))
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
                     Text(formatTime(message.timestamp))
                         .font(.system(size: fontSize - 4))

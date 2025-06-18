@@ -39,79 +39,92 @@ struct UserProfileView: View {
     @Environment(\.locale) var locale
     
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            HStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 0) {
-                    // 顶部头像区
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(alignment: .center, spacing: 16) {
-                            userViewModel.userAvatar
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 60, height: 60)
-                                .clipShape(Circle())
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(userViewModel.isLoggedIn ? userViewModel.username : NSLocalizedString("请登录", comment: ""))
-                                    .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.black)
-                            }
-                            Spacer()
-                            Button(action: { withAnimation { showSettingsDrawer = true } }) {
-                                Image(systemName: "pencil")
-                                    .foregroundColor(.gray)
-                                    .padding(8)
-                                    .background(Color(.systemGray6))
-                                    .clipShape(Circle())
-                            }
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // 遮罩只在内容区右侧
+                if isShowingProfile {
+                    Color.black.opacity(0.08)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation { isShowingProfile = false }
                         }
-                        .padding(.top, 36)
-                        .padding(.bottom, 18)
-                        .padding(.horizontal, 20)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .offset(x: geometry.size.width * 0.8)
+                }
+                // 主抽屉和设置抽屉frame完全一致，ZStack切换内容，切换时直接覆盖
+                ZStack {
+                    if !showSettingsDrawer {
+                        VStack(alignment: .leading, spacing: 0) {
+                            // 顶部头像区
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(alignment: .center, spacing: 16) {
+                                    userViewModel.userAvatar
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 60, height: 60)
+                                        .clipShape(Circle())
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        Text(userViewModel.isLoggedIn ? userViewModel.username : NSLocalizedString("请登录", comment: ""))
+                                            .font(.system(size: 20, weight: .semibold))
+                                            .foregroundColor(.black)
+                                    }
+                                    Spacer()
+                                    Button(action: { withAnimation { showSettingsDrawer = true } }) {
+                                        Image(systemName: "pencil")
+                                            .foregroundColor(.gray)
+                                            .padding(8)
+                                            .background(Color(.systemGray6))
+                                            .clipShape(Circle())
+                                    }
+                                }
+                                .padding(.top, 36)
+                                .padding(.bottom, 18)
+                                .padding(.horizontal, 20)
+                            }
+                            Divider().padding(.bottom, 2)
+                            // 功能区
+                            VStack(alignment: .leading, spacing: 0) {
+                                DrawerItem(icon: "book", text: "联系人")
+                                DrawerItem(icon: "bell", text: "通知")
+                                DrawerItem(icon: "clock.arrow.circlepath", text: "版本历史", badge: "新")
+                                DrawerItem(icon: "headphones", text: "联系我们")
+                                DrawerItem(icon: "person.badge.plus", text: "添加团队成员", sub: "成员可访问公开信息...")
+                                DrawerItem(icon: "gearshape", text: "设置")
+                                DrawerItem(icon: "info.circle", text: "关于App")
+                                DrawerItem(icon: "star", text: "我的收藏")
+                                DrawerItem(icon: "doc.text", text: "我的文档")
+                                DrawerItem(icon: "creditcard", text: "支付与订单")
+                                DrawerItem(icon: "questionmark.circle", text: "帮助与反馈")
+                            }
+                            .padding(.horizontal, 8)
+                            Spacer()
+                        }
+                        .frame(width: geometry.size.width * 0.8, height: geometry.size.height)
+                        .background(Color.white)
+                        .cornerRadius(0, corners: [.topLeft, .bottomLeft])
+                        .cornerRadius(24, corners: [.topRight, .bottomRight])
+                        .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+                        // 顶部右上角关闭按钮
+                        .overlay(
+                            Button(action: { withAnimation { isShowingProfile = false } }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 26, weight: .bold))
+                                    .foregroundColor(Color(.systemGray3))
+                                    .padding(12)
+                            }, alignment: .topTrailing
+                        )
+                        .transition(.opacity)
                     }
-                    Divider().padding(.bottom, 2)
-                    // 功能区
-                    VStack(alignment: .leading, spacing: 0) {
-                        DrawerItem(icon: "book", text: NSLocalizedString("联系人", comment: ""))
-                        DrawerItem(icon: "bell", text: NSLocalizedString("通知", comment: ""))
-                        DrawerItem(icon: "clock.arrow.circlepath", text: NSLocalizedString("版本历史", comment: ""), badge: NSLocalizedString("新", comment: ""))
-                        DrawerItem(icon: "headphones", text: NSLocalizedString("联系我们", comment: ""))
-                        DrawerItem(icon: "person.badge.plus", text: NSLocalizedString("添加团队成员", comment: ""), sub: NSLocalizedString("成员可访问公开信息...", comment: ""))
+                    if showSettingsDrawer {
+                        SettingsDrawerView(isShowing: $showSettingsDrawer)
+                            .frame(width: geometry.size.width * 0.8, height: geometry.size.height)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(0, corners: [.topLeft, .bottomLeft])
+                            .cornerRadius(24, corners: [.topRight, .bottomRight])
+                            .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+                            .transition(.opacity)
                     }
-                    .padding(.horizontal, 8)
-                    Spacer()
                 }
-                .frame(width: UIScreen.main.bounds.width * 0.7)
-                .background(Color.white)
-                // 顶部右上角关闭按钮
-                .overlay(
-                    Button(action: { withAnimation { isShowingProfile = false } }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 26, weight: .bold))
-                            .foregroundColor(Color(.systemGray3))
-                            .padding(12)
-                    }, alignment: .topTrailing
-                )
-                Spacer(minLength: 0)
-            }
-            // 右侧透明区域点击关闭
-            .contentShape(Rectangle())
-            .onTapGesture {
-                withAnimation { isShowingProfile = false }
-            }
-            // 设置抽屉
-            if showSettingsDrawer {
-                HStack(spacing: 0) {
-                    Spacer(minLength: UIScreen.main.bounds.width * 0.3)
-                    SettingsDrawerView(isShowing: $showSettingsDrawer)
-                        .frame(width: UIScreen.main.bounds.width * 0.7)
-                        .background(Color(.systemBackground))
-                        .transition(.move(edge: .trailing))
-                }
-                .background(Color.black.opacity(0.18).ignoresSafeArea())
-                .onTapGesture {
-                    withAnimation { showSettingsDrawer = false }
-                }
-                .zIndex(2)
             }
         }
     }
