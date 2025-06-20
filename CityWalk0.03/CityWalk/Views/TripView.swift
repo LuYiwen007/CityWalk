@@ -44,6 +44,7 @@ struct TripView: View {
                     UserProfileView(isShowingProfile: $showProfileDrawer)
                         .frame(width: UIScreen.main.bounds.width * 0.7)
                         .background(Color(.systemBackground))
+                        .ignoresSafeArea(edges: .top)
                         .transition(.move(edge: .leading))
                     Spacer(minLength: 0)
                 }
@@ -54,6 +55,7 @@ struct TripView: View {
                             withAnimation { showProfileDrawer = false }
                         }
                 )
+                .ignoresSafeArea()
                 .zIndex(2)
             }
             

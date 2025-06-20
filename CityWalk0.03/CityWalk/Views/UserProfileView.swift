@@ -67,7 +67,7 @@ struct UserProfileView: View {
                                 .clipShape(Circle())
                         }
                                 }
-                                .padding(.top, 36)
+                                .padding(.top, 60)
                                 .padding(.bottom, 18)
                                 .padding(.horizontal, 20)
                             }
@@ -186,7 +186,7 @@ struct SettingsDrawerView: View {
                 }
                 .foregroundColor(.gray)
             }
-            .padding(.top, 18)
+            .padding(.top, 60)
             .padding(.bottom, 8)
             .background(Color.white)
             Divider()
