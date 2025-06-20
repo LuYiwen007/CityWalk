@@ -1,31 +1,21 @@
 import SwiftUI
+import Foundation
 
-// 为帖子创建一个数据模型
-struct PostItem: Identifiable {
-    let id = UUID()
-    let imageName: String
-    let title: String
-    let authorName: String
-    let authorImageName: String
-    let likes: Int
-}
 
 // 创建一些示例帖子数据
 let samplePosts: [PostItem] = [
-    PostItem(imageName: "Japan 1", title: "米亚罗霸王山成都出发3.5小时", authorName: "浪迹川西", authorImageName: "SuzhouGarden", likes: 45),
-    PostItem(imageName: "Japan 2", title: "成都哪里可以寄存宝宝一个星期", authorName: "沙沙", authorImageName: "SuzhouGarden", likes: 20),
-    PostItem(imageName: "Japan", title: "成都融创怎么还不倒闭？", authorName: "匿名用户", authorImageName: "SuzhouGarden", likes: 99),
-    PostItem(imageName: "HangzhouWestlake", title: "千岛湖喜来登小红书首发福", authorName: "喜来登", authorImageName: "SuzhouGarden", likes: 108),
+    PostItem(imageName: "Miyaluo", title: "米亚罗霸王山成都出发3.5小时", authorName: "浪迹川西", authorImageName: "SuzhouGarden", likes: 45),
+    PostItem(imageName: "Chengdu", title: "成都CityWalk路线推荐", authorName: "沙沙", authorImageName: "SuzhouGarden", likes: 20),
+    PostItem(imageName: "Japan", title: "成都欢乐谷一日攻略", authorName: "匿名用户", authorImageName: "SuzhouGarden", likes: 99),
+    PostItem(imageName: "HangzhouWestlake", title: "千岛湖喜来登小红书首发", authorName: "喜来登", authorImageName: "SuzhouGarden", likes: 108),
     PostItem(imageName: "SuzhouGarden", title: "苏州园林一日游", authorName: "江南梦", authorImageName: "SuzhouGarden", likes: 76),
-    PostItem(imageName: "HangzhouWestlake 1", title: "周末西湖边CityWalk", authorName: "杭州小笼包", authorImageName: "SuzhouGarden", likes: 233),
-    PostItem(imageName: "Suzhou 1", title: "拙政园的正确打开方式", authorName: "园林艺术", authorImageName: "SuzhouGarden", likes: 12),
-    PostItem(imageName: "Japan 1", title: "富士山下的樱花", authorName: "东京爱情故事", authorImageName: "SuzhouGarden", likes: 520),
+    PostItem(imageName: "Japan", title: "富士山下的樱花", authorName: "东京爱情故事", authorImageName: "SuzhouGarden", likes: 520),
 ]
 
 struct CommunityView: View {
     @State private var selectedCategory = 0
     @State private var showMenu = false // 控制侧边栏显示
-    let categories = ["推荐", "直播", "短剧", "穿搭", "美食", "旅行"]
+    let categories = ["推荐", "周边", "旅行"]
     
     // 将帖子分为两列
     var columns: [GridItem] = [
@@ -71,7 +61,6 @@ struct CommunityView: View {
 
                         Image(systemName: "magnifyingglass")
                             .font(.title2)
-                        .padding(.horizontal)
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 10)
@@ -146,14 +135,13 @@ struct PostCardView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(minWidth: 0, maxWidth: .infinity)
-                .frame(height: CGFloat.random(in: 150...250)) // 随机高度
+                .frame(height: 180) // 固定高度
                 .cornerRadius(12)
                 .clipped()
             
             Text(post.title)
                 .font(.subheadline)
                 .foregroundColor(.primary)
-                .lineLimit(2)
             
             HStack(spacing: 6) {
                 Image(post.authorImageName)
