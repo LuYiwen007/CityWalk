@@ -72,68 +72,44 @@ struct TripView: View {
                 .zIndex(2)
             }
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    // 顶部栏 - 更现代的设计
-                    HStack {
-                        Button(action: {
-                            withAnimation { showProfileDrawer = true }
-                        }) {
-                            Image(systemName: "line.3.horizontal")
-                                .font(.title2)
-                                .frame(width: 40, height: 40)
-                                .foregroundColor(.primary)
-                                .background(
-                                    Circle()
-                                        .fill(Color.white)
-                                        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
-                                )
-                        }
-                        Spacer()
-                        VStack(spacing: 2) {
-                            Text("我的旅程")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.primary)
-                            Text("Journey")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.secondary)
-                        }
-                        Spacer()
-                        Button(action: {
-                            showSettings = true
-                        }) {
-                            Image(systemName: "gearshape.fill")
-                                .resizable()
-                                .frame(width: 22, height: 22)
-                                .foregroundColor(.gray)
-                                .padding(12)
-                                .background(
-                                    Circle()
-                                        .fill(Color.white)
-                                        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
-                                )
-                        }
-                        .sheet(isPresented: $showSettings) {
-                            SettingsView(isShowingSettings: $showSettings)
-                        }
+            VStack(spacing: 0) {
+                // 顶部栏 - 参考CommunityView设计
+                HStack {
+                    Button(action: {
+                        withAnimation { showProfileDrawer = true }
+                    }) {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.title2)
+                            .foregroundColor(.primary)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 24)
-                    .background(
-                        RoundedRectangle(cornerRadius: 0)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.white.opacity(0.95),
-                                        Color.white.opacity(0.9)
-                                    ]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .shadow(color: .black.opacity(0.05), radius: 12, x: 0, y: 6)
-                    )
-                    
+                    Spacer()
+                    VStack(spacing: 2) {
+                        Text("我的旅程")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.primary)
+                        Text("Journey")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                    Button(action: {
+                        showSettings = true
+                    }) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title2)
+                            .foregroundColor(.primary)
+                    }
+                    .sheet(isPresented: $showSettings) {
+                        SettingsView(isShowingSettings: $showSettings)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 10)
+                .background(Color.white)
+                
+                Divider()
+                
+                ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
                         // 欢迎区域 - 更丰富的设计
                         VStack(alignment: .leading, spacing: 12) {

@@ -77,6 +77,8 @@ struct CommunityView: View {
                     .padding(.bottom, 10)
                     .background(Color(.systemGroupedBackground))
 
+                    Divider()
+
                     // 分类滚动视图
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 20) {
