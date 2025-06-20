@@ -26,16 +26,29 @@ struct TripView: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // 背景渐变
+            // 背景渐变 - 更现代的配色
             LinearGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 0.95, green: 0.97, blue: 1.0),
-                    Color(red: 0.98, green: 0.99, blue: 1.0),
+                    Color(red: 0.92, green: 0.95, blue: 1.0),
+                    Color(red: 0.96, green: 0.98, blue: 1.0),
                     Color.white
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            .ignoresSafeArea()
+            
+            // 装饰性背景元素
+            VStack {
+                HStack {
+                    Circle()
+                        .fill(Color.blue.opacity(0.1))
+                        .frame(width: 200, height: 200)
+                        .offset(x: -100, y: -50)
+                    Spacer()
+                }
+                Spacer()
+            }
             .ignoresSafeArea()
             
             // 侧边抽屉
@@ -61,96 +74,117 @@ struct TripView: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    // 顶部栏
+                    // 顶部栏 - 更现代的设计
                     HStack {
                         Button(action: {
                             withAnimation { showProfileDrawer = true }
                         }) {
                             Image(systemName: "person.circle.fill")
                                 .resizable()
-                                .frame(width: 32, height: 32)
+                                .frame(width: 40, height: 40)
                                 .foregroundColor(.blue)
-                                .background(Color.white)
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                .background(
+                                    Circle()
+                                        .fill(Color.white)
+                                        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
+                                )
                         }
                         Spacer()
-                        Text("我的")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.primary)
+                        VStack(spacing: 2) {
+                            Text("我的旅程")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.primary)
+                            Text("Journey")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
                         Spacer()
                         Button(action: {
                             showSettings = true
                         }) {
                             Image(systemName: "gearshape.fill")
                                 .resizable()
-                                .frame(width: 24, height: 24)
+                                .frame(width: 22, height: 22)
                                 .foregroundColor(.gray)
-                                .padding(8)
-                                .background(Color.white)
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                .padding(12)
+                                .background(
+                                    Circle()
+                                        .fill(Color.white)
+                                        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
+                                )
                         }
                         .sheet(isPresented: $showSettings) {
                             SettingsView(isShowingSettings: $showSettings)
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .background(Color.white.opacity(0.8))
-                    .blur(radius: 0.5)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 0)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.white.opacity(0.95),
+                                        Color.white.opacity(0.9)
+                                    ]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .shadow(color: .black.opacity(0.05), radius: 12, x: 0, y: 6)
+                    )
                     
-                    VStack(alignment: .leading, spacing: 24) {
-                        // 欢迎区域
-                        VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 32) {
+                        // 欢迎区域 - 更丰富的设计
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("欢迎回来")
-                                .font(.system(size: 28, weight: .bold))
+                                .font(.system(size: 32, weight: .bold))
                                 .foregroundColor(.primary)
                             Text("继续您的精彩旅程")
-                                .font(.system(size: 16))
+                                .font(.system(size: 18))
                                 .foregroundColor(.secondary)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 32)
                         
                         // 当前行程
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 20) {
                             HStack {
                                 Text("当前行程")
-                                    .font(.system(size: 20, weight: .bold))
+                                    .font(.system(size: 22, weight: .bold))
                                     .foregroundColor(.primary)
                                 Spacer()
                                 Text("进行中")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
+                                    .font(.system(size: 13, weight: .medium))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
                                     .background(Color.green.opacity(0.2))
                                     .foregroundColor(.green)
                                     .clipShape(Capsule())
                             }
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, 24)
                             
                             TripCardView(trip: currentTrip, isCurrent: true)
-                                .padding(.horizontal, 20)
+                                .padding(.horizontal, 24)
                         }
                         
                         // 历史行程
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 20) {
                             Text("历史行程")
-                                .font(.system(size: 20, weight: .bold))
+                                .font(.system(size: 22, weight: .bold))
                                 .foregroundColor(.primary)
-                                .padding(.horizontal, 20)
+                                .padding(.horizontal, 24)
                             
-                            VStack(spacing: 16) {
+                            VStack(spacing: 24) {
                                 ForEach(historyTrips.sorted(by: { $0.date > $1.date })) { trip in
                                     TripCardView(trip: trip, isCurrent: false)
                                 }
                             }
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, 24)
                         }
                         
                         // 底部间距
-                        Spacer(minLength: 100)
+                        Spacer(minLength: 120)
                     }
                 }
             }
@@ -165,7 +199,7 @@ struct TripCardView: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             // 主卡片背景
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 24)
                 .fill(
                     LinearGradient(
                         gradient: Gradient(colors: isCurrent ? 
@@ -176,8 +210,8 @@ struct TripCardView: View {
                         endPoint: .bottomTrailing
                     )
                 )
-                .shadow(color: isCurrent ? Color.blue.opacity(0.3) : Color.black.opacity(0.08), 
-                       radius: isCurrent ? 12 : 8, x: 0, y: isCurrent ? 6 : 4)
+                .shadow(color: isCurrent ? Color.blue.opacity(0.25) : Color.black.opacity(0.08), 
+                       radius: isCurrent ? 16 : 12, x: 0, y: isCurrent ? 8 : 6)
             
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .top) {
