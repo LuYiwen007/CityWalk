@@ -79,10 +79,10 @@ struct TripView: View {
                         Button(action: {
                             withAnimation { showProfileDrawer = true }
                         }) {
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
+                            Image(systemName: "line.3.horizontal")
+                                .font(.title2)
                                 .frame(width: 40, height: 40)
-                                .foregroundColor(.blue)
+                                .foregroundColor(.primary)
                                 .background(
                                     Circle()
                                         .fill(Color.white)
