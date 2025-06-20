@@ -3,13 +3,13 @@ import Foundation
 
 
 // 创建一些示例帖子数据
-let samplePosts: [PostItem] = [
-    PostItem(imageName: "Miyaluo", title: "米亚罗霸王山成都出发3.5小时", authorName: "浪迹川西", authorImageName: "SuzhouGarden", likes: 45),
-    PostItem(imageName: "Chengdu", title: "成都CityWalk路线推荐", authorName: "沙沙", authorImageName: "SuzhouGarden", likes: 20),
-    PostItem(imageName: "Japan", title: "成都欢乐谷一日攻略", authorName: "匿名用户", authorImageName: "SuzhouGarden", likes: 99),
-    PostItem(imageName: "HangzhouWestlake", title: "千岛湖喜来登小红书首发", authorName: "喜来登", authorImageName: "SuzhouGarden", likes: 108),
-    PostItem(imageName: "SuzhouGarden", title: "苏州园林一日游", authorName: "江南梦", authorImageName: "SuzhouGarden", likes: 76),
-    PostItem(imageName: "Japan", title: "富士山下的樱花", authorName: "东京爱情故事", authorImageName: "SuzhouGarden", likes: 520),
+let samplePosts: [CommunityPostItem] = [
+    CommunityPostItem(imageName: "Miyaluo", title: "米亚罗霸王山2日", authorName: "浪迹川西", authorImageName: "SuzhouGarden", likes: 45),
+    CommunityPostItem(imageName: "Chengdu", title: "成都CityWalk路线推荐", authorName: "沙沙", authorImageName: "SuzhouGarden", likes: 20),
+    CommunityPostItem(imageName: "Japan", title: "成都欢乐谷一日攻略", authorName: "匿名用户", authorImageName: "SuzhouGarden", likes: 99),
+    CommunityPostItem(imageName: "HangzhouWestlake", title: "千岛湖喜来登小红书首发", authorName: "喜来登", authorImageName: "SuzhouGarden", likes: 108),
+    CommunityPostItem(imageName: "SuzhouGarden", title: "苏州园林一日游", authorName: "江南梦", authorImageName: "SuzhouGarden", likes: 76),
+    CommunityPostItem(imageName: "Japan", title: "富士山下的樱花", authorName: "东京爱情故事", authorImageName: "SuzhouGarden", likes: 520),
 ]
 
 struct CommunityView: View {
@@ -127,7 +127,7 @@ struct CommunityView: View {
 }
 
 struct PostCardView: View {
-    let post: PostItem
+    let post: CommunityPostItem
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
