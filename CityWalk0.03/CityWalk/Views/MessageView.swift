@@ -5,8 +5,6 @@ import MapKit
 struct MessageView: View {
     @StateObject private var viewModel = MessageViewModel() // 聊天数据模型
     @StateObject private var settings = SettingsManager.shared // 设置管理器
-    @State private var showUserProfile = false // 是否显示用户资料页
-    @State private var showSettings = false // 是否显示设置页
     @State private var mapHeight: CGFloat = 0 // 地图高度
     @State private var isChatMinimized = false // 聊天页面是否收缩为小圆圈
     @State private var showChat = true // 是否显示聊天页面
@@ -15,7 +13,6 @@ struct MessageView: View {
     @State private var imagePickerSource: UIImagePickerController.SourceType = .photoLibrary
     @State private var dragOffset: CGSize = .zero // 聊天小圆圈拖动偏移
     @Namespace private var animation // 用于动画
-    @State private var showProfileDrawer = false // 控制侧边抽屉
     
     // 新增：地图状态共享对象
     var sharedMapState: SharedMapState? = nil
@@ -28,24 +25,6 @@ struct MessageView: View {
     // 主体视图，渲染聊天界面、消息列表、地图弹窗、输入区等
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            // 侧边抽屉
-            if showProfileDrawer {
-                HStack(spacing: 0) {
-                    UserProfileView(isShowingProfile: $showProfileDrawer)
-                        .frame(width: UIScreen.main.bounds.width * 0.7)
-                        .background(Color(.systemBackground))
-                        .transition(.move(edge: .leading))
-                    Spacer(minLength: 0)
-                }
-                .background(
-                    Color.black.opacity(0.18)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            withAnimation { showProfileDrawer = false }
-                        }
-                )
-                .zIndex(2)
-            }
             // 地图始终在底层
             if !showChat {
                 if let sharedMapState = sharedMapState {
@@ -63,29 +42,10 @@ struct MessageView: View {
         VStack(spacing: 0) {
                     // 顶部栏
             HStack {
-                Button(action: {
-                            withAnimation { showProfileDrawer = true }
-                }) {
-                    Image(systemName: "person.circle.fill")
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .foregroundColor(.blue)
-                }
                 Spacer()
                 Text("聊天")
                     .font(.system(size: settings.fontSize))
                 Spacer()
-                Button(action: {
-                    showSettings = true
-                }) {
-                    Image(systemName: "gearshape.fill")
-                        .resizable()
-                        .frame(width: 25, height: 25)
-                        .foregroundColor(.gray)
-                }
-                .sheet(isPresented: $showSettings) {
-                    SettingsView(isShowingSettings: $showSettings)
-                }
             }
             .padding()
             .background(Color(.systemBackground))

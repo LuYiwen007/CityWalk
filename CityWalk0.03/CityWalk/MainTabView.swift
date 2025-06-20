@@ -18,26 +18,26 @@ struct MainTabView: View {
             Group {
                 switch selectedTab {
                 case 0:
-                    // 行程页面
-                    TripView()
+                    // 社区页面
+                    CommunityView()
                         .padding(.bottom, tabBarHeight)
                 case 1:
                     // 聊天页面
                     MessageView(sharedMapState: sharedMapState)
                         .padding(.bottom, tabBarHeight)
                 case 2:
-                    // 社区页面
-                    CommunityView()
+                    // 我的页面
+                    TripView()
                         .padding(.bottom, tabBarHeight)
                 default:
-                    MessageView(sharedMapState: sharedMapState)
+                    CommunityView()
                         .padding(.bottom, tabBarHeight)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             // 底部Tab栏
             HStack {
-                TabBarButton(title: "行程", systemImage: "suitcase.fill", selected: selectedTab == 0) {
+                TabBarButton(title: "社区", systemImage: "person.3.fill", selected: selectedTab == 0) {
                     selectedTab = 0
                 }
                 Spacer()
@@ -45,7 +45,7 @@ struct MainTabView: View {
                     selectedTab = 1
                 }
                 Spacer()
-                TabBarButton(title: "社区", systemImage: "person.3.fill", selected: selectedTab == 2) {
+                TabBarButton(title: "我的", systemImage: "suitcase.fill", selected: selectedTab == 2) {
                     selectedTab = 2
                 }
             }
