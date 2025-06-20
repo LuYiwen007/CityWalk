@@ -10,7 +10,7 @@ class SharedMapState: ObservableObject {
 struct MainTabView: View {
     @Binding var selectedTab: Int // 当前选中的Tab索引
     @StateObject private var sharedMapState = SharedMapState() // 地图状态共享对象
-    private let tabBarHeight: CGFloat = 48 // 底部Tab栏高度
+    private let tabBarHeight: CGFloat = 68 // 增加底部Tab栏高度
     
     // 主体视图，渲染Tab内容和底部导航栏
     var body: some View {
@@ -37,22 +37,27 @@ struct MainTabView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             // 底部Tab栏
             HStack {
-                TabBarButton(title: "社区", systemImage: "person.3.fill", selected: selectedTab == 0) {
-                    selectedTab = 0
+                TabBarButton(title: "社区", systemImage: "person.3", selected: selectedTab == 0) {
+                    withAnimation(.easeInOut(duration: 0.2)) { selectedTab = 0 }
                 }
                 Spacer()
-                TabBarButton(title: "聊天", systemImage: "bubble.left.and.bubble.right.fill", selected: selectedTab == 1) {
-                    selectedTab = 1
+                TabBarButton(title: "聊天", systemImage: "bubble.left.and.bubble.right", selected: selectedTab == 1) {
+                    withAnimation(.easeInOut(duration: 0.2)) { selectedTab = 1 }
                 }
                 Spacer()
-                TabBarButton(title: "我的", systemImage: "suitcase.fill", selected: selectedTab == 2) {
-                    selectedTab = 2
+                TabBarButton(title: "我的", systemImage: "suitcase", selected: selectedTab == 2) {
+                    withAnimation(.easeInOut(duration: 0.2)) { selectedTab = 2 }
                 }
             }
             .padding(.horizontal, 30)
-            .padding(.bottom, 4)
+            .padding(.top, 12)
             .frame(height: tabBarHeight)
-            .background(Color(.systemBackground).opacity(0.95).ignoresSafeArea(edges: .bottom))
+            .background(
+                Color(.systemBackground)
+                    .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
+                    .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: -4)
+                    .ignoresSafeArea(.all, edges: .bottom)
+            )
         }
     }
 }
@@ -66,18 +71,22 @@ struct TabBarButton: View {
     // 渲染单个Tab按钮
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 2) {
+            VStack(spacing: 5) {
                 Image(systemName: systemImage)
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(selected ? .blue : .gray)
+                    .font(.system(size: 24, weight: .regular))
+                    .symbolVariant(selected ? .fill : .none)
+                    .scaleEffect(selected ? 1.05 : 1.0)
+                    .foregroundColor(selected ? .blue : .gray.opacity(0.8))
                 Text(title)
-                    .font(.system(size: 13, weight: selected ? .bold : .regular))
-                    .foregroundColor(selected ? .blue : .gray)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(selected ? .blue : .gray.opacity(0.8))
             }
             .frame(maxWidth: .infinity)
         }
+        .buttonStyle(PlainButtonStyle())
     }
 }
+
 
 // 我的页面占位视图
 struct MyPageView: View {
