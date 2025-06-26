@@ -21,57 +21,51 @@ class QianwenService: NSObject, URLSessionDataDelegate {
     private override init() {}
     
     private let apiKey = "sk-7c54a7c880bc41c29bb571fd2c348488" // API密钥
-    private let baseURL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation" // API基础地址
-    private let appId = "7188b1ce823343f9b919d61f0a5f7d59" // 用户阿里云应用ID
-    
+    private let baseURL = "https://dashscope.aliyuncs.com/api/v1/apps/7188b1ce823343f9b919d61f0a5f7d59/completion" // API基础地址
+    // private let appId = "7188b1ce823343f9b919d61f0a5f7d59" // 用户阿里云应用ID
+
     // 发送消息，返回原始响应字符串
     func sendMessage(_ text: String) async throws -> String {
         let endpoint = baseURL
         guard let url = URL(string: endpoint) else {
             throw QianwenError.invalidURL
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("enable", forHTTPHeaderField: "X-DashScope-SSE") // 新增SSE流式输出Header
-        
+
         let body: [String: Any] = [
-            "model": "qwen-turbo",
             "input": [
-                "messages": [
-                    [
-                        "role": "user",
-                        "content": text
-                    ]
-                ]
+                "prompt": text
             ],
             "parameters": [
-                "incremental_output": true // 官方推荐流式参数
+                "incremental_output": true
             ],
-            "app_id": appId // 新增app_id字段
+            "debug": [:]
         ]
-        
+
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        
+
         let (data, response) = try await URLSession.shared.data(for: request)
-        
+
         guard let httpResponse = response as? HTTPURLResponse else {
             throw QianwenError.invalidResponse
         }
-        
+
         if httpResponse.statusCode != 200 {
             throw QianwenError.invalidResponse
         }
-        
+
         guard let responseString = String(data: data, encoding: .utf8) else {
             throw QianwenError.invalidResponse
         }
-        
+
         return responseString
     }
-    
+
     // 以流式方式发送消息，逐步回调onReceive，结束时回调onComplete
     func streamMessage(
         query: String,
@@ -81,33 +75,27 @@ class QianwenService: NSObject, URLSessionDataDelegate {
         self.onReceive = onReceive
         self.onComplete = onComplete
         self.receivedData = Data()
-        
+
         let endpoint = baseURL
         guard let url = URL(string: endpoint) else {
             onComplete(QianwenError.invalidURL)
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("enable", forHTTPHeaderField: "X-DashScope-SSE") // 新增SSE流式输出Header
-        
+
         let body: [String: Any] = [
-            "model": "qwen-turbo",
             "input": [
-                "messages": [
-                    [
-                        "role": "user",
-                        "content": query
-                    ]
-                ]
+                "prompt": query
             ],
             "parameters": [
-                "incremental_output": true // 官方推荐流式参数
+                "incremental_output": true
             ],
-            "app_id": appId // 新增app_id字段
+            "debug": [:]
         ]
         
         do {
