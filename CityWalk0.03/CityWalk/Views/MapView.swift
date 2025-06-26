@@ -29,7 +29,7 @@ struct MapView: View {
         }
         .sheet(isPresented: $showRouteSheet) {
             if let routeInfo = routeInfo {
-                RouteDetailView(routeTitle: routeInfo)
+                RouteDetailView(route: RouteDetailView_Previews.mockRoute)
                     .presentationDetents([.height(UIScreen.main.bounds.height * 0.6), .large])
                     .presentationDragIndicator(.visible)
             }

@@ -7,7 +7,8 @@ struct Place: Identifiable {
     let imageName: String? // 可选图片名
 }
 
-struct Route {
+struct Route: Identifiable {
+    let id = UUID()
     let title: String
     let author: String
     let description: String

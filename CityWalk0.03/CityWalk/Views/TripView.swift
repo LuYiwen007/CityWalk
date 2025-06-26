@@ -23,6 +23,7 @@ struct TripView: View {
     @State private var showSettings = false // 是否显示设置页
     @State private var showProfileDrawer = false // 控制侧边抽屉
     @StateObject private var settings = SettingsManager.shared // 设置管理器
+    @State private var selectedRoute: Route? = nil
     
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -111,18 +112,6 @@ struct TripView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
-                        // 欢迎区域 - 更丰富的设计
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("欢迎回来")
-                                .font(.system(size: 32, weight: .bold))
-                                .foregroundColor(.primary)
-                            Text("继续您的精彩旅程")
-                                .font(.system(size: 18))
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.horizontal, 24)
-                        .padding(.top, 32)
-                        
                         // 当前行程
                         VStack(alignment: .leading, spacing: 20) {
                             HStack {
@@ -130,15 +119,9 @@ struct TripView: View {
                                     .font(.system(size: 22, weight: .bold))
                                     .foregroundColor(.primary)
                                 Spacer()
-                                Text("进行中")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
-                                    .background(Color.green.opacity(0.2))
-                                    .foregroundColor(.green)
-                                    .clipShape(Capsule())
                             }
                             .padding(.horizontal, 24)
+                            .padding(.top, 36)
                             
                             TripCardView(trip: currentTrip, isCurrent: true)
                                 .padding(.horizontal, 24)
@@ -154,6 +137,10 @@ struct TripView: View {
                             VStack(spacing: 24) {
                                 ForEach(historyTrips.sorted(by: { $0.date > $1.date })) { trip in
                                     TripCardView(trip: trip, isCurrent: false)
+                                        .onTapGesture {
+                                            // 这里用mockRoute做演示，实际可根据trip生成Route
+                                            selectedRoute = RouteDetailView_Previews.mockRoute
+                                        }
                                 }
                             }
                             .padding(.horizontal, 24)
@@ -164,6 +151,9 @@ struct TripView: View {
                     }
                 }
             }
+        }
+        .fullScreenCover(item: $selectedRoute) { route in
+            RouteDetailView(route: route)
         }
     }
 }
@@ -277,25 +267,6 @@ struct TripCardView: View {
                                     .font(.system(size: 20))
                                     .foregroundColor(.gray)
                             )
-                    }
-                    
-                    // 添加按钮
-                    Button(action: {
-                        // TODO: 添加行程操作
-                    }) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 12, weight: .bold))
-                            Text("添加")
-                                .font(.system(size: 14, weight: .medium))
-                        }
-                        .foregroundColor(isCurrent ? .white : .blue)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(
-                            Capsule()
-                                .fill(isCurrent ? Color.white.opacity(0.2) : Color.blue.opacity(0.1))
-                        )
                     }
                     
                     Spacer()
