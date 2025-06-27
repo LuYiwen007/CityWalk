@@ -29,8 +29,12 @@ struct AMapViewRepresentable: UIViewRepresentable {
         mapView.isZoomEnabled = true
         AMapServices.shared().enableHTTPS = true
         context.coordinator.mapView = mapView
+        // 主动请求系统定位权限
+        let clManager = CLLocationManager()
+        clManager.requestWhenInUseAuthorization()
         // 默认定位到用户当前位置
         let locationManager = AMapLocationManager()
+        locationManager.delegate = context.coordinator // 新增：设置delegate
         locationManager.requestLocation(withReGeocode: false) { location, _, _ in
             if let loc = location {
                 mapView.setCenter(loc.coordinate, animated: false)
@@ -103,7 +107,7 @@ struct AMapViewRepresentable: UIViewRepresentable {
         }
     }
 
-    class Coordinator: NSObject, MAMapViewDelegate, AMapSearchDelegate, CustomSearchBarViewDelegate {
+    class Coordinator: NSObject, MAMapViewDelegate, AMapSearchDelegate, CustomSearchBarViewDelegate, AMapLocationManagerDelegate {
         var parent: AMapViewRepresentable
         var search: AMapSearchAPI?
         var mapView: MAMapView?
@@ -112,6 +116,8 @@ struct AMapViewRepresentable: UIViewRepresentable {
         var currentMapView: MAMapView? = nil
         var currentDest: CLLocationCoordinate2D? = nil
         var currentAnnotation: MAPointAnnotation? = nil
+        // 新增：缓存用户最新位置
+        var latestUserLocation: CLLocationCoordinate2D?
         
         init(_ parent: AMapViewRepresentable) {
             self.parent = parent
@@ -121,7 +127,8 @@ struct AMapViewRepresentable: UIViewRepresentable {
             infoCardView.isHidden = true
             infoCardView.onRoute = { [weak self] in
                 guard let self = self, let mapView = self.mapView, let dest = self.currentDest else { return }
-                if let userLoc = mapView.userLocation.location?.coordinate {
+                // 优先使用缓存的用户位置
+                if let userLoc = self.latestUserLocation ?? mapView.userLocation.location?.coordinate {
                     print("点击导航按钮，准备发起步行路线规划：\(userLoc) -> \(dest)")
                     self.searchWalkingRoute(from: userLoc, to: dest, on: mapView)
                 } else {
@@ -206,6 +213,21 @@ struct AMapViewRepresentable: UIViewRepresentable {
                 return renderer
             }
             return nil
+        }
+        // 新增：监听用户位置更新
+        func mapView(_ mapView: MAMapView!, didUpdate userLocation: MAUserLocation!, updatingLocation: Bool) {
+            if updatingLocation, let coord = userLocation.location?.coordinate {
+                latestUserLocation = coord
+            }
+        }
+        // MARK: - MAMapViewDelegate
+        func mapViewRequireLocationAuth(_ locationManager: CLLocationManager!) {
+            locationManager.requestWhenInUseAuthorization()
+        }
+
+        // MARK: - AMapLocationManagerDelegate
+        func amapLocationManager(_ manager: AMapLocationManager!, doRequireLocationAuth locationManager: CLLocationManager!) {
+            locationManager.requestWhenInUseAuthorization()
         }
     }
 }
