@@ -111,6 +111,7 @@ struct AMapViewRepresentable: UIViewRepresentable {
         let infoCardView = InfoCardView()
         var currentMapView: MAMapView? = nil
         var currentDest: CLLocationCoordinate2D? = nil
+        var currentAnnotation: MAPointAnnotation? = nil
         
         init(_ parent: AMapViewRepresentable) {
             self.parent = parent
@@ -121,7 +122,10 @@ struct AMapViewRepresentable: UIViewRepresentable {
             infoCardView.onRoute = { [weak self] in
                 guard let self = self, let mapView = self.mapView, let dest = self.currentDest else { return }
                 if let userLoc = mapView.userLocation.location?.coordinate {
+                    print("点击导航按钮，准备发起步行路线规划：\(userLoc) -> \(dest)")
                     self.searchWalkingRoute(from: userLoc, to: dest, on: mapView)
+                } else {
+                    print("点击导航按钮，但未获取到用户当前位置（userLocation为nil）")
                 }
                 self.infoCardView.isHidden = true
             }
@@ -153,6 +157,7 @@ struct AMapViewRepresentable: UIViewRepresentable {
         }
         // 步行路线规划
         func searchWalkingRoute(from origin: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D, on mapView: MAMapView) {
+            print("开始步行路线规划：\(origin) -> \(destination)")
             let request = AMapWalkingRouteSearchRequest()
             request.origin = AMapGeoPoint.location(withLatitude: CGFloat(origin.latitude), longitude: CGFloat(origin.longitude))
             request.destination = AMapGeoPoint.location(withLatitude: CGFloat(destination.latitude), longitude: CGFloat(destination.longitude))
@@ -162,7 +167,11 @@ struct AMapViewRepresentable: UIViewRepresentable {
         }
         // 步行路线回调
         func onWalkingRouteSearchDone(_ request: AMapWalkingRouteSearchRequest!, response: AMapRouteSearchResponse!) {
-            guard let path = response.route.paths.first, let mapView = currentMapView else { return }
+            print("步行路线回调 onWalkingRouteSearchDone 被调用")
+            guard let path = response.route.paths.first, let mapView = currentMapView else { 
+                print("步行路线回调但无有效路径或mapView为nil")
+                return 
+            }
             if let steps = path.steps as? [AMapStep] {
                 var coordinates: [CLLocationCoordinate2D] = []
                 for step in steps {
@@ -179,7 +188,14 @@ struct AMapViewRepresentable: UIViewRepresentable {
                 let polyline = MAPolyline(coordinates: &coordinates, count: UInt(coordinates.count))
                 mapView.removeOverlays(mapView.overlays)
                 mapView.add(polyline)
+                print("步行路线已绘制，点数：\(coordinates.count)")
+            } else {
+                print("步行路线回调但steps为空")
             }
+        }
+        // 捕获高德SDK请求失败
+        func aMapSearchRequest(_ request: Any!, didFailWithError error: Error!) {
+            print("高德步行路线请求失败：\(error.localizedDescription)")
         }
         // 绘制路线
         func mapView(_ mapView: MAMapView!, rendererFor overlay: MAOverlay!) -> MAOverlayRenderer! {

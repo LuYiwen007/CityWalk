@@ -36,22 +36,9 @@
 		CE95EAB161754FE0CA95EF30 /* Pods_CityWalk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CityWalk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C76910902DBDAF4100101A30 /* Exceptions for "CityWalk" folder in "CityWalk" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = C76710D12DBB71A6001069C7 /* CityWalk */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C76710D42DBB71A6001069C7 /* CityWalk */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				C76910902DBDAF4100101A30 /* Exceptions for "CityWalk" folder in "CityWalk" target */,
-			);
 			path = CityWalk;
 			sourceTree = "<group>";
 		};
@@ -298,9 +285,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-CityWalk/Pods-CityWalk-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-CityWalk/Pods-CityWalk-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
