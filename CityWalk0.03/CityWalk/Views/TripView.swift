@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreLocation
 
 struct Trip: Identifiable {
     let id = UUID()
@@ -17,14 +18,19 @@ struct TripView: View {
         Trip(title: "苏州园林3日游", days: "3天2晚", locations: "9个地点", image: Image("SuzhouGarden"), avatar: nil, date: Date().addingTimeInterval(-86400*10)),
         Trip(title: "杭州西湖2日游", days: "2天1晚", locations: "8个地点", image: Image("HangzhouWestlake"), avatar: nil, date: Date().addingTimeInterval(-86400*20))
     ]
-    
+
     // 新增状态变量
     @State private var showUserProfile = false // 是否显示用户资料页
     @State private var showSettings = false // 是否显示设置页
     @State private var showProfileDrawer = false // 控制侧边抽屉
     @StateObject private var settings = SettingsManager.shared // 设置管理器
     @State private var selectedRoute: Route? = nil
-    
+    @State private var showStats: Bool = false
+    @State private var statsRouteCoordinates: [CLLocationCoordinate2D] = []
+    @State private var statsDuration: TimeInterval = 3600
+    @State private var statsDistance: Double = 5.2
+    @State private var statsCalories: Double = 320
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             // 背景渐变 - 更现代的配色
@@ -38,7 +44,7 @@ struct TripView: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             // 装饰性背景元素
             VStack {
                 HStack {
@@ -51,7 +57,7 @@ struct TripView: View {
                 Spacer()
             }
             .ignoresSafeArea()
-            
+
             // 侧边抽屉
             if showProfileDrawer {
                 HStack(spacing: 0) {
@@ -72,7 +78,7 @@ struct TripView: View {
                 .ignoresSafeArea()
                 .zIndex(2)
             }
-            
+
             VStack(spacing: 0) {
                 // 顶部栏 - 参考CommunityView设计
                 HStack {
@@ -107,45 +113,37 @@ struct TripView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 10)
                 .background(Color.white)
-                
+
                 Divider()
-                
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
-                        // 当前行程
-                        VStack(alignment: .leading, spacing: 20) {
-                            HStack {
-                                Text("当前行程")
-                                    .font(.system(size: 22, weight: .bold))
-                                    .foregroundColor(.primary)
-                                Spacer()
-                            }
-                            .padding(.horizontal, 24)
-                            .padding(.top, 36)
-                            
-                            TripCardView(trip: currentTrip, isCurrent: true)
-                                .padding(.horizontal, 24)
-                        }
-                        
                         // 历史行程
                         VStack(alignment: .leading, spacing: 20) {
                             Text("历史行程")
                                 .font(.system(size: 22, weight: .bold))
                                 .foregroundColor(.primary)
                                 .padding(.horizontal, 24)
-                            
+                                .padding(.top, 36)
+
                             VStack(spacing: 24) {
                                 ForEach(historyTrips.sorted(by: { $0.date > $1.date })) { trip in
-                                    TripCardView(trip: trip, isCurrent: false)
-                                        .onTapGesture {
-                                            // 这里用mockRoute做演示，实际可根据trip生成Route
-                                            selectedRoute = RouteDetailView_Previews.mockRoute
-                                        }
+                                    TripCardView(trip: trip, isCurrent: false, onStats: {
+                                        // 这里用mock数据，实际可根据trip生成
+                                        statsRouteCoordinates = []
+                                        statsDuration = 3600
+                                        statsDistance = 5.2
+                                        statsCalories = 320
+                                        showStats = true
+                                    })
+                                    .onTapGesture {
+                                        selectedRoute = RouteDetailView_Previews.mockRoute
+                                    }
                                 }
                             }
                             .padding(.horizontal, 24)
                         }
-                        
+
                         // 底部间距
                         Spacer(minLength: 120)
                     }
@@ -153,7 +151,10 @@ struct TripView: View {
             }
         }
         .fullScreenCover(item: $selectedRoute) { route in
-            RouteDetailView(route: route)
+            RouteFullDetailView(route: route)
+        }
+        .sheet(isPresented: $showStats) {
+            TripStatsView(routeCoordinates: statsRouteCoordinates, duration: statsDuration, distance: statsDistance, calories: statsCalories)
         }
     }
 }
@@ -161,14 +162,15 @@ struct TripView: View {
 struct TripCardView: View {
     let trip: Trip
     let isCurrent: Bool
-    
+    var onStats: (() -> Void)? = nil
+
     var body: some View {
         ZStack(alignment: .topTrailing) {
             // 主卡片背景
             RoundedRectangle(cornerRadius: 24)
                 .fill(
                     LinearGradient(
-                        gradient: Gradient(colors: isCurrent ? 
+                        gradient: Gradient(colors: isCurrent ?
                             [Color(red: 0.2, green: 0.6, blue: 1.0), Color(red: 0.1, green: 0.4, blue: 0.9)] :
                             [Color.white, Color(red: 0.98, green: 0.98, blue: 0.98)]
                         ),
@@ -176,9 +178,9 @@ struct TripCardView: View {
                         endPoint: .bottomTrailing
                     )
                 )
-                .shadow(color: isCurrent ? Color.blue.opacity(0.25) : Color.black.opacity(0.08), 
+                .shadow(color: isCurrent ? Color.blue.opacity(0.25) : Color.black.opacity(0.08),
                        radius: isCurrent ? 16 : 12, x: 0, y: isCurrent ? 8 : 6)
-            
+
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 12) {
@@ -186,7 +188,7 @@ struct TripCardView: View {
                             .font(.system(size: 22, weight: .bold))
                             .foregroundColor(isCurrent ? .white : .primary)
                             .lineLimit(2)
-                        
+
                         HStack(spacing: 20) {
                             HStack(spacing: 6) {
                                 Image(systemName: "calendar")
@@ -196,7 +198,7 @@ struct TripCardView: View {
                                     .font(.system(size: 15, weight: .medium))
                                     .foregroundColor(isCurrent ? .white.opacity(0.9) : .gray)
                             }
-                            
+
                             HStack(spacing: 6) {
                                 Image(systemName: "mappin.and.ellipse")
                                     .font(.system(size: 14))
@@ -208,7 +210,7 @@ struct TripCardView: View {
                         }
                     }
                     Spacer()
-                    
+
                     // 右上图片区域
                     if let img = trip.image {
                         img
@@ -245,9 +247,9 @@ struct TripCardView: View {
                             )
                     }
                 }
-                
+
                 Spacer(minLength: 0)
-                
+
                 // 底部操作区域
                 HStack(spacing: 12) {
                     // 头像区域
@@ -268,9 +270,9 @@ struct TripCardView: View {
                                     .foregroundColor(.gray)
                             )
                     }
-                    
+
                     Spacer()
-                    
+
                     // 状态指示器
                     if isCurrent {
                         HStack(spacing: 4) {
@@ -285,7 +287,60 @@ struct TripCardView: View {
                 }
             }
             .padding(20)
+            // 右下角统计和分享按钮
+            if !isCurrent {
+                HStack(spacing: 16) {
+                    Button(action: {
+                        onStats?()
+                    }) {
+                        Image(systemName: "chart.bar")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.blue)
+                            .padding(10)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(color: Color.black.opacity(0.08), radius: 2, x: 0, y: 1)
+                    }
+                    Button(action: {
+                        // TODO: 分享操作
+                    }) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.blue)
+                            .padding(10)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(color: Color.black.opacity(0.08), radius: 2, x: 0, y: 1)
+                    }
+                }
+                .padding(16)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+            }
         }
         .frame(height: 200)
+    }
+}
+
+// 复合详情页：上地图下详情
+struct RouteFullDetailView: View {
+    let route: Route
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                // 上部地图区域（2/5）
+                AMapViewRepresentable(routeCoordinates: nil, destination: .constant(nil), showSearchBar: false)
+                    .frame(height: geometry.size.height * 0.4)
+                    .clipped()
+
+                // 下部详情内容（3/5）
+                ZStack(alignment: .bottom) {
+                    RouteDetailView(route: route)
+                        .frame(height: geometry.size.height * 0.6)
+                        .background(Color.white)
+                }
+            }
+            .edgesIgnoringSafeArea(.top)
+        }
     }
 } 

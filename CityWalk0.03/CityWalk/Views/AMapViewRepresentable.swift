@@ -11,7 +11,8 @@ struct AMapViewRepresentable: UIViewRepresentable {
     @Binding var destination: CLLocationCoordinate2D?
     // 新增：搜索回调
     var onSearch: ((String) -> Void)? = nil
-    
+    var showSearchBar: Bool = true
+
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
@@ -48,17 +49,19 @@ struct AMapViewRepresentable: UIViewRepresentable {
             mapView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             mapView.trailingAnchor.constraint(equalTo: container.trailingAnchor)
         ])
-        // 自定义美化搜索框
-        let searchView = CustomSearchBarView()
-        searchView.delegate = context.coordinator
-        searchView.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(searchView)
-        NSLayoutConstraint.activate([
-            searchView.topAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor, constant: 12),
-            searchView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 10),
-            searchView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -10),
-            searchView.heightAnchor.constraint(equalToConstant: 52)
-        ])
+        if showSearchBar {
+            // 自定义美化搜索框
+            let searchView = CustomSearchBarView()
+            searchView.delegate = context.coordinator
+            searchView.translatesAutoresizingMaskIntoConstraints = false
+            container.addSubview(searchView)
+            NSLayoutConstraint.activate([
+                searchView.topAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor, constant: 12),
+                searchView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 10),
+                searchView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -10),
+                searchView.heightAnchor.constraint(equalToConstant: 52)
+            ])
+        }
         // 右下角定位按钮
         let locateBtn = UIButton(type: .custom)
         locateBtn.setImage(UIImage(systemName: "location.fill"), for: .normal)

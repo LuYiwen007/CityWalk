@@ -23,106 +23,70 @@ struct CommunityView: View {
         GridItem(.flexible(), spacing: 16)
     ]
     
-    var body: some View {
-        NavigationView {
-            ZStack(alignment: .leading) {
-                VStack(spacing: 0) {
-                    // 自定义导航栏
-                    HStack {
-                        Button(action: {
-                            withAnimation {
-                                self.showMenu.toggle()
-                            }
-                        }) {
-                            Image(systemName: "line.3.horizontal")
-                                .font(.title2)
-                                .foregroundColor(.primary)
-                        }
-                        
-                        Spacer()
-                        
-                        HStack(spacing: 0) {
-                            Text("发现")
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-                                .background(Color.white)
-                                .cornerRadius(18)
-                            
-                            Text("成都")
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-                                .background(Color.clear)
-                                .cornerRadius(18)
-                        }
-                        .background(Color(.systemGray5))
-                        .cornerRadius(18)
-                        
-                        Spacer()
+    @State private var selectedPost: CommunityPostItem? = nil
 
-                        Image(systemName: "magnifyingglass")
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            // 侧边抽屉
+            if showMenu {
+                HStack(spacing: 0) {
+                    UserProfileView(isShowingProfile: $showMenu)
+                        .frame(width: UIScreen.main.bounds.width * 0.7)
+                        .background(Color(.systemBackground))
+                        .ignoresSafeArea(edges: .top)
+                        .transition(.move(edge: .leading))
+                    Spacer(minLength: 0)
+                }
+                .background(
+                    Color.black.opacity(0.18)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            withAnimation { showMenu = false }
+                        }
+                )
+                .ignoresSafeArea()
+                .zIndex(2)
+            }
+
+            VStack(spacing: 0) {
+                // 顶部栏
+                HStack {
+                    Button(action: {
+                        withAnimation { showMenu = true }
+                    }) {
+                        Image(systemName: "line.3.horizontal")
                             .font(.title2)
+                            .foregroundColor(.primary)
+                    }
+                    Spacer()
+                    Text("社区")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.primary)
+                    Spacer()
+                    // 右侧可留空或加设置按钮
+                    Spacer().frame(width: 24)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 10)
+                .background(Color.white)
+
+                // 帖子瀑布流
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 20) {
+                        ForEach(samplePosts) { post in
+                            PostCardView(post: post)
+                                .onTapGesture {
+                                    selectedPost = post
+                                }
+                        }
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 10)
-                    .background(Color(.systemGroupedBackground))
-
-                    Divider()
-
-                    // 分类滚动视图
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 20) {
-                            ForEach(categories.indices, id: \.self) { index in
-                                Button(action: {
-                                    selectedCategory = index
-                                }) {
-                                    Text(categories[index])
-                                        .font(selectedCategory == index ? .headline : .subheadline)
-                                        .foregroundColor(selectedCategory == index ? .primary : .secondary)
-                                        .scaleEffect(selectedCategory == index ? 1.1 : 1.0)
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.vertical, 10)
-                    }
-                    .background(Color(.systemGroupedBackground))
-
-                    // 帖子瀑布流
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 20) {
-                            ForEach(samplePosts) { post in
-                                PostCardView(post: post)
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-                .navigationBarHidden(true)
-                .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
-
-                // 侧边栏菜单 - 更新以匹配TripView
-                if showMenu {
-                    HStack(spacing: 0) {
-                        UserProfileView(isShowingProfile: $showMenu)
-                            .frame(width: UIScreen.main.bounds.width * 0.7)
-                            .background(Color(.systemBackground))
-                            .ignoresSafeArea(edges: .top)
-                            .transition(.move(edge: .leading))
-                        Spacer(minLength: 0)
-                    }
-                    .background(
-                        Color.black.opacity(0.18)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                withAnimation { self.showMenu = false }
-                            }
-                    )
-                    .ignoresSafeArea()
-                    .zIndex(2)
                 }
             }
+            .sheet(item: $selectedPost) { post in
+                PostDetailView(post: post)
+            }
         }
-        .navigationViewStyle(StackNavigationViewStyle()) // 避免iPad上的分栏视图
     }
 }
 
