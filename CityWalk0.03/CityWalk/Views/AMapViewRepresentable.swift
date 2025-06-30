@@ -168,13 +168,13 @@ struct AMapViewRepresentable: UIViewRepresentable {
             let request = AMapWalkingRouteSearchRequest()
             request.origin = AMapGeoPoint.location(withLatitude: CGFloat(origin.latitude), longitude: CGFloat(origin.longitude))
             request.destination = AMapGeoPoint.location(withLatitude: CGFloat(destination.latitude), longitude: CGFloat(destination.longitude))
-            request.showFieldsType = .all
+            request.showFieldsType = AMapWalkingRouteShowFieldType.all
             search?.aMapWalkingRouteSearch(request)
             self.currentMapView = mapView
         }
         // 步行路线回调
-        func onWalkingRouteSearchDone(_ request: AMapWalkingRouteSearchRequest!, response: AMapRouteSearchResponse!) {
-            print("步行路线回调 onWalkingRouteSearchDone 被调用")
+        func onRouteSearchDone(_ request: AMapRouteSearchBaseRequest!, response: AMapRouteSearchResponse!) {
+            print("步行路线回调 onRouteSearchDone 被调用")
             guard let path = response.route.paths.first, let mapView = currentMapView else { 
                 print("步行路线回调但无有效路径或mapView为nil")
                 return 
