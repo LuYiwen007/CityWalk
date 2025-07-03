@@ -25,187 +25,185 @@ struct RouteDetailView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // 标题
-            HStack {
-                Text(route.title)
-                    .font(.system(size: 24, weight: .bold))
-                Spacer()
-                HStack(spacing: -10) {
-                    Image(systemName: "person.crop.circle.fill")
-                        .font(.title)
-                        .foregroundColor(.gray)
-                    Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.green)
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 16) {
+                // 标题
+                HStack {
+                    Text(route.title)
+                        .font(.system(size: 24, weight: .bold))
+                    Spacer()
+                    HStack(spacing: -10) {
+                        Image(systemName: "person.crop.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.gray)
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.green)
+                    }
                 }
-            }
-            .padding(.horizontal)
-            .padding(.top, 16)
+                .padding(.horizontal)
+                .padding(.top, 16)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // 总览和地点tabs
-                    VStack(alignment: .leading, spacing: 8) {
-                        // Tab栏
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 16) {
-                                // 总览tab
-                                Button(action: {
-                                    selectedTab = 0
-                                }) {
-                                    VStack(spacing: 4) {
-                                        Text("总览")
-                                            .font(.headline)
-                                            .foregroundColor(selectedTab == 0 ? .blue : .primary)
-                                        Rectangle()
-                                            .frame(width: 30, height: 4)
-                                            .foregroundColor(selectedTab == 0 ? .blue : .clear)
-                                            .cornerRadius(2)
-                                    }
-                                }
-                                
-                                // 各个地点tabs
-                                ForEach(Array(places.enumerated()), id: \ .offset) { index, place in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        // 总览和地点tabs
+                        VStack(alignment: .leading, spacing: 8) {
+                            // Tab栏
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    // 总览tab
                                     Button(action: {
-                                        selectedTab = index + 1
+                                        selectedTab = 0
                                     }) {
                                         VStack(spacing: 4) {
-                                            Text(place.name)
-                                                .font(.caption)
-                                                .foregroundColor(selectedTab == index + 1 ? .blue : .primary)
-                                                .lineLimit(1)
-                                                .fixedSize(horizontal: false, vertical: true)
+                                            Text("总览")
+                                                .font(.headline)
+                                                .foregroundColor(selectedTab == 0 ? .blue : .primary)
                                             Rectangle()
                                                 .frame(width: 30, height: 4)
-                                                .foregroundColor(selectedTab == index + 1 ? .blue : .clear)
+                                                .foregroundColor(selectedTab == 0 ? .blue : .clear)
                                                 .cornerRadius(2)
                                         }
                                     }
+                                    
+                                    // 各个地点tabs
+                                    ForEach(Array(places.enumerated()), id: \ .offset) { index, place in
+                                        Button(action: {
+                                            selectedTab = index + 1
+                                        }) {
+                                            VStack(spacing: 4) {
+                                                Text(place.name)
+                                                    .font(.caption)
+                                                    .foregroundColor(selectedTab == index + 1 ? .blue : .primary)
+                                                    .lineLimit(1)
+                                                    .fixedSize(horizontal: false, vertical: true)
+                                                Rectangle()
+                                                    .frame(width: 30, height: 4)
+                                                    .foregroundColor(selectedTab == index + 1 ? .blue : .clear)
+                                                    .cornerRadius(2)
+                                            }
+                                        }
+                                    }
                                 }
+                                .padding(.horizontal)
+                            }
+                        }
+                        .padding(.horizontal)
+
+                        // 根据选中的tab显示不同内容
+                        if selectedTab == 0 {
+                            // 总览内容
+                            VStack(alignment: .leading, spacing: 16) {
+                                HStack {
+                                    Image(systemName: "map.fill")
+                                        .foregroundColor(.blue)
+                                    Text("行程概览")
+                                        .font(.headline)
+                                }
+                                .padding(.bottom, 8)
+                                
+                                // 地点列表
+                                VStack(spacing: 12) {
+                                    ForEach(Array(places.enumerated()), id: \ .offset) { index, place in
+                                        HStack(spacing: 12) {
+                                            // 序号圆圈
+                                            ZStack {
+                                                Circle()
+                                                    .fill(Color.blue)
+                                                    .frame(width: 30, height: 30)
+                                                Text("\(index + 1)")
+                                                    .font(.caption)
+                                                    .fontWeight(.semibold)
+                                                    .foregroundColor(.white)
+                                            }
+                                            // 地点信息
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(place.name)
+                                                    .font(.subheadline)
+                                                    .fontWeight(.medium)
+                                                    .foregroundColor(.primary)
+                                                Text("第\(index + 1)站")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                            Spacer()
+                                            if isEditing {
+                                                // 负号按钮
+                                                Button(action: {
+                                                    places.remove(at: index)
+                                                    // 如果当前tab被删，跳回总览tab
+                                                    if selectedTab == index + 1 {
+                                                        selectedTab = 0
+                                                    } else if selectedTab > places.count {
+                                                        selectedTab = 0
+                                                    }
+                                                }) {
+                                                    Image(systemName: "minus.circle.fill")
+                                                        .foregroundColor(.red)
+                                                        .font(.title3)
+                                                }
+                                            }
+                                            // 箭头图标（除了最后一个地点）
+                                            if index < places.count - 1 {
+                                                Image(systemName: "arrow.down")
+                                                    .font(.caption)
+                                                    .foregroundColor(.blue)
+                                            }
+                                        }
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(12)
+                                    }
+                                }
+                            }
+                        } else if selectedTab > 0, selectedTab <= places.count {
+                            // 具体地点内容
+                            let placeIndex = selectedTab - 1
+                            let place = places[placeIndex]
+                            
+                            VStack(alignment: .leading, spacing: 16) {
+                                // 地点图片
+                                if let imageName = place.imageName, !imageName.isEmpty, UIImage(named: imageName) != nil {
+                                    Image(imageName)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 200)
+                                        .clipped()
+                                        .cornerRadius(12)
+                                } else {
+                                    Image(systemName: "photo")
+                                        .font(.system(size: 200))
+                                        .foregroundColor(.gray)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 200)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(12)
+                                        .overlay(
+                                            Text("\(place.name) 图片")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        )
+                                }
+                                // 地点介绍文字
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(place.name)
+                                        .font(.headline)
+                                        .fontWeight(.semibold)
+                                    Text(place.detail)
+                                        .font(.body)
+                                        .foregroundColor(.secondary)
+                                        .lineSpacing(4)
+                                }
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
                             }
                             .padding(.horizontal)
                         }
                     }
-                    .padding(.horizontal)
-
-                    // 根据选中的tab显示不同内容
-                    if selectedTab == 0 {
-                        // 总览内容
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Image(systemName: "map.fill")
-                                    .foregroundColor(.blue)
-                                Text("行程概览")
-                                    .font(.headline)
-                            }
-                            .padding(.bottom, 8)
-                            
-                            // 地点列表
-                            VStack(spacing: 12) {
-                                ForEach(Array(places.enumerated()), id: \ .offset) { index, place in
-                                    HStack(spacing: 12) {
-                                        // 序号圆圈
-                                        ZStack {
-                                            Circle()
-                                                .fill(Color.blue)
-                                                .frame(width: 30, height: 30)
-                                            Text("\(index + 1)")
-                                                .font(.caption)
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(.white)
-                                        }
-                                        // 地点信息
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(place.name)
-                                                .font(.subheadline)
-                                                .fontWeight(.medium)
-                                                .foregroundColor(.primary)
-                                            Text("第\(index + 1)站")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-                                        Spacer()
-                                        if isEditing {
-                                            // 负号按钮
-                                            Button(action: {
-                                                places.remove(at: index)
-                                                // 如果当前tab被删，跳回总览tab
-                                                if selectedTab == index + 1 {
-                                                    selectedTab = 0
-                                                } else if selectedTab > places.count {
-                                                    selectedTab = 0
-                                                }
-                                            }) {
-                                                Image(systemName: "minus.circle.fill")
-                                                    .foregroundColor(.red)
-                                                    .font(.title3)
-                                            }
-                                        }
-                                        // 箭头图标（除了最后一个地点）
-                                        if index < places.count - 1 {
-                                            Image(systemName: "arrow.down")
-                                                .font(.caption)
-                                                .foregroundColor(.blue)
-                                        }
-                                    }
-                                    .padding()
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(12)
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                    } else if selectedTab > 0, selectedTab <= places.count {
-                        // 具体地点内容
-                        let placeIndex = selectedTab - 1
-                        let place = places[placeIndex]
-                        
-                        VStack(alignment: .leading, spacing: 16) {
-                            // 地点图片
-                            if let imageName = place.imageName, !imageName.isEmpty, UIImage(named: imageName) != nil {
-                                Image(imageName)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 200)
-                                    .clipped()
-                                    .cornerRadius(12)
-                            } else {
-                                Image(systemName: "photo")
-                                    .font(.system(size: 200))
-                                    .foregroundColor(.gray)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 200)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(12)
-                                    .overlay(
-                                        Text("\(place.name) 图片")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    )
-                            }
-                            // 地点介绍文字
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(place.name)
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
-                                Text(place.detail)
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                    .lineSpacing(4)
-                            }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(12)
-                        }
-                        .padding(.horizontal)
-                    }
                 }
             }
-            
-            Spacer()
-
-            // 底部按钮
+            // 底部按钮区
             HStack(spacing: 12) {
                 Button(action: {
                     dismiss()
@@ -258,33 +256,18 @@ struct RouteDetailView: View {
                 .cornerRadius(25)
                 .disabled(isLoadingPOI || (navigationIndex != nil && navigationIndex! >= places.count - 1))
             }
+            .padding(.top, 8)
+            .padding(.bottom, 16)
             .padding(.horizontal)
-            .padding(.bottom, 8)
         }
-        .onAppear {
-            // 定位权限和监听
-            locationManager.delegate = locationManagerDelegate
-            locationManager.requestWhenInUseAuthorization()
-            locationManager.startUpdatingLocation()
-        }
-        .onDisappear {
-            locationManager.stopUpdatingLocation()
-        }
-        .onReceive(locationManagerDelegate.$currentLocation) { loc in
-            userLocation = loc
-            // 判断是否到达目标地
-            if isNavigating, let dest = destinationLocation, let user = loc {
-                let distance = CLLocation(latitude: user.latitude, longitude: user.longitude).distance(from: CLLocation(latitude: dest.latitude, longitude: dest.longitude))
-                if distance < 50, let idx = navigationIndex, idx < places.count - 1 {
-                    // 到达目标地，允许继续导航
-                    isNavigating = false
-                }
-            }
-        }
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .padding(.horizontal, 16)
+        .padding(.top, 24)
     }
     // 导航逻辑：用POI名称查经纬度并发起导航
     func startNavigation() {
-        guard let idx = navigationIndex, idx < places.count - 1 else { return }
+        guard let idx = navigationIndex, idx < places.count - 1 else { print("[导航] navigationIndex无效"); return }
         isLoadingPOI = true
         let fromName: String
         if idx == 0 {
@@ -293,16 +276,25 @@ struct RouteDetailView: View {
             fromName = places[idx].name
         }
         let toName = places[idx + 1].name
-        // 1. 查起点POI经纬度
+        print("[导航] startNavigation from=\(fromName) to=\(toName)")
         AMapPOISearchHelper.searchPOI(keyword: fromName) { fromCoord in
-            guard let fromCoord = fromCoord else { isLoadingPOI = false; return }
-            // 2. 查终点POI经纬度
+            print("[导航] 起点POI查找结果 from=\(fromName), coord=\(String(describing: fromCoord))")
+            guard let fromCoord = fromCoord else { isLoadingPOI = false; print("[导航] 起点查找失败"); return }
             AMapPOISearchHelper.searchPOI(keyword: toName) { poiCoord in
+                print("[导航] 终点POI查找结果 to=\(toName), coord=\(String(describing: poiCoord))")
                 isLoadingPOI = false
                 if let destCoord = poiCoord {
-                    startCoordinate = fromCoord
-                    destinationLocation = destCoord
-                    isNavigating = true
+                    // 强制刷新地图组件
+                    startCoordinate = nil
+                    destinationLocation = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        startCoordinate = fromCoord
+                        destinationLocation = destCoord
+                        print("[导航] 设置startCoordinate=\(fromCoord), destinationLocation=\(destCoord)")
+                        isNavigating = true
+                    }
+                } else {
+                    print("[导航] 终点查找失败")
                 }
             }
         }
@@ -322,12 +314,48 @@ class LocationDelegate: NSObject, CLLocationManagerDelegate, ObservableObject {
 // 辅助：高德POI搜索
 class AMapPOISearchHelper {
     static func searchPOI(keyword: String, completion: @escaping (CLLocationCoordinate2D?) -> Void) {
-        // 这里用高德Web API或你已有的API进行POI名称转经纬度
-        // 伪代码：
-        // 调用高德API，返回第一个POI的经纬度
-        // completion(CLLocationCoordinate2D(latitude: ..., longitude: ...))
-        // 实际实现请用你已有的API封装
-        completion(nil) // TODO: 替换为真实API调用
+        let apiKey = "d87559570133cb52b49cf4b0aa772ff0"
+        let city = "广州"
+        let encodedKeyword = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "https://restapi.amap.com/v3/place/text?key=\(apiKey)&keywords=\(encodedKeyword)&city=\(city)&output=JSON&offset=1&page=1"
+        print("[POI搜索] keyword=\(keyword), url=\(urlString)")
+        guard let url = URL(string: urlString) else {
+            print("[POI搜索] URL无效")
+            completion(nil)
+            return
+        }
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("[POI搜索] 网络错误：", error)
+                completion(nil)
+                return
+            }
+            guard let data = data else {
+                print("[POI搜索] 无数据")
+                completion(nil)
+                return
+            }
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let pois = json["pois"] as? [[String: Any]],
+                   let first = pois.first,
+                   let location = first["location"] as? String {
+                    let comps = location.split(separator: ",")
+                    if comps.count == 2, let lon = Double(comps[0]), let lat = Double(comps[1]) {
+                        let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+                        print("[POI搜索] 结果 keyword=\(keyword), coord=\(coord)")
+                        completion(coord)
+                        return
+                    }
+                }
+                print("[POI搜索] 未找到POI或经纬度解析失败 keyword=\(keyword)")
+                completion(nil)
+            } catch {
+                print("[POI搜索] 解析错误：", error)
+                completion(nil)
+            }
+        }
+        task.resume()
     }
 }
 

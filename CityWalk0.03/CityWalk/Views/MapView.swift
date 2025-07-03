@@ -8,7 +8,9 @@ struct MapView: View {
     @Binding var isShowingProfile: Bool // 控制是否显示用户资料
     var sharedMapState: SharedMapState? = nil // 可选的地图状态共享对象
     var routeInfo: String?
-    // 新增：用于步行导航的目的地
+    // 新增：用于步行导航的起点和终点
+    var startCoordinate: CLLocationCoordinate2D? = nil
+    var destinationLocation: CLLocationCoordinate2D? = nil
     @State private var destination: CLLocationCoordinate2D? = nil
     @State private var showRouteSheet: Bool = false
     
@@ -17,8 +19,8 @@ struct MapView: View {
         GeometryReader { geometry in
             ZStack(alignment: .bottom) {
                 // 用高德地图替换原有MapKit地图
-                AMapViewRepresentable(routeCoordinates: nil, destination: $destination)
-                .frame(width: geometry.size.width, height: geometry.size.height)
+                AMapViewRepresentable(routeCoordinates: nil, startCoordinate: startCoordinate, destination: .constant(destinationLocation))
+                    .frame(width: geometry.size.width, height: geometry.size.height)
                 // 右上角自定义定位按钮和底部分界线等UI保留
                 Rectangle()
                     .frame(height: 1)
