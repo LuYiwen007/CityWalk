@@ -1,5 +1,6 @@
 import SwiftUI
 import Foundation
+import CoreLocation
 
 struct RouteDetailView: View {
     let route: Route
@@ -8,6 +9,15 @@ struct RouteDetailView: View {
     @State private var places: [Place]
     @State private var isEditing = false
     @Environment(\.dismiss) private var dismiss
+    // 新增导航相关状态
+    @State private var navigationIndex: Int? = nil // 当前导航段索引
+    @State private var userLocation: CLLocationCoordinate2D? = nil // 用户当前位置
+    @State private var destinationLocation: CLLocationCoordinate2D? = nil // 当前目标地经纬度
+    @State private var isNavigating: Bool = false // 是否正在导航
+    @State private var isLoadingPOI: Bool = false // 是否正在请求POI
+    @State private var locationManager = CLLocationManager()
+    @State private var locationManagerDelegate = LocationDelegate()
+    @State private var startCoordinate: CLLocationCoordinate2D? = nil // 当前分段起点
     
     init(route: Route) {
         self.route = route
@@ -223,10 +233,101 @@ struct RouteDetailView: View {
                 .background(Color.black)
                 .foregroundColor(.white)
                 .cornerRadius(25)
+                // 新增"开始导航"按钮
+                Button(action: {
+                    if navigationIndex == nil {
+                        // 开始第一段导航
+                        navigationIndex = 0
+                        startNavigation()
+                    } else if let idx = navigationIndex, idx < places.count - 1 {
+                        // 继续下一段导航
+                        navigationIndex = idx + 1
+                        startNavigation()
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: isNavigating ? "location.north.line" : "location")
+                        Text(navigationIndex == nil ? "开始导航" : (navigationIndex! < places.count - 1 ? "继续导航" : "已完成"))
+                            .fontWeight(.semibold)
+                    }
+                }
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(navigationIndex == nil || (navigationIndex! < places.count - 1) ? Color.blue : Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(25)
+                .disabled(isLoadingPOI || (navigationIndex != nil && navigationIndex! >= places.count - 1))
             }
             .padding(.horizontal)
             .padding(.bottom, 8)
         }
+        .onAppear {
+            // 定位权限和监听
+            locationManager.delegate = locationManagerDelegate
+            locationManager.requestWhenInUseAuthorization()
+            locationManager.startUpdatingLocation()
+        }
+        .onDisappear {
+            locationManager.stopUpdatingLocation()
+        }
+        .onReceive(locationManagerDelegate.$currentLocation) { loc in
+            userLocation = loc
+            // 判断是否到达目标地
+            if isNavigating, let dest = destinationLocation, let user = loc {
+                let distance = CLLocation(latitude: user.latitude, longitude: user.longitude).distance(from: CLLocation(latitude: dest.latitude, longitude: dest.longitude))
+                if distance < 50, let idx = navigationIndex, idx < places.count - 1 {
+                    // 到达目标地，允许继续导航
+                    isNavigating = false
+                }
+            }
+        }
+    }
+    // 导航逻辑：用POI名称查经纬度并发起导航
+    func startNavigation() {
+        guard let idx = navigationIndex, idx < places.count - 1 else { return }
+        isLoadingPOI = true
+        let fromName: String
+        if idx == 0 {
+            fromName = places[0].name
+        } else {
+            fromName = places[idx].name
+        }
+        let toName = places[idx + 1].name
+        // 1. 查起点POI经纬度
+        AMapPOISearchHelper.searchPOI(keyword: fromName) { fromCoord in
+            guard let fromCoord = fromCoord else { isLoadingPOI = false; return }
+            // 2. 查终点POI经纬度
+            AMapPOISearchHelper.searchPOI(keyword: toName) { poiCoord in
+                isLoadingPOI = false
+                if let destCoord = poiCoord {
+                    startCoordinate = fromCoord
+                    destinationLocation = destCoord
+                    isNavigating = true
+                }
+            }
+        }
+    }
+}
+
+// 辅助：定位代理
+class LocationDelegate: NSObject, CLLocationManagerDelegate, ObservableObject {
+    @Published var currentLocation: CLLocationCoordinate2D? = nil
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let loc = locations.last {
+            currentLocation = loc.coordinate
+        }
+    }
+}
+
+// 辅助：高德POI搜索
+class AMapPOISearchHelper {
+    static func searchPOI(keyword: String, completion: @escaping (CLLocationCoordinate2D?) -> Void) {
+        // 这里用高德Web API或你已有的API进行POI名称转经纬度
+        // 伪代码：
+        // 调用高德API，返回第一个POI的经纬度
+        // completion(CLLocationCoordinate2D(latitude: ..., longitude: ...))
+        // 实际实现请用你已有的API封装
+        completion(nil) // TODO: 替换为真实API调用
     }
 }
 

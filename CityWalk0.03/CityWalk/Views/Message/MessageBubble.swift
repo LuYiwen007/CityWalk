@@ -144,7 +144,7 @@ struct MessageBubble: View {
                 }
             }
             .padding(.top, 8)
-            .padding(.leading, 40 + 12) // Avatar width + spacing
+            .padding(.leading, 40 + 12) // 头像宽度加间距
             .padding(.trailing, 12)
         }
     }

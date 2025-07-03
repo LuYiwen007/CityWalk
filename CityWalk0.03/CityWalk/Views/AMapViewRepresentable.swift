@@ -7,6 +7,8 @@ import AMapLocationKit
 struct AMapViewRepresentable: UIViewRepresentable {
     // 支持外部传入路线点串
     var routeCoordinates: [CLLocationCoordinate2D]?
+    // 新增：可选的起点坐标（用于分段导航）
+    var startCoordinate: CLLocationCoordinate2D? = nil
     // 新增：可选的目的地坐标（用于手动导航）
     @Binding var destination: CLLocationCoordinate2D?
     // 新增：搜索回调
@@ -103,6 +105,9 @@ struct AMapViewRepresentable: UIViewRepresentable {
             var coords = coordinates
             let polyline = MAPolyline(coordinates: &coords, count: UInt(coords.count))
             mapView.add(polyline)
+        } else if let start = startCoordinate, let dest = destination {
+            // 分段导航：用传入的起点和终点做路线规划
+            context.coordinator.searchWalkingRoute(from: start, to: dest, on: mapView)
         } else if let dest = destination {
             if let userLoc = mapView.userLocation.location?.coordinate {
                 context.coordinator.searchWalkingRoute(from: userLoc, to: dest, on: mapView)
@@ -224,11 +229,13 @@ struct AMapViewRepresentable: UIViewRepresentable {
             }
         }
         // MARK: - MAMapViewDelegate
+        // MARK: - MAMapView代理方法
         func mapViewRequireLocationAuth(_ locationManager: CLLocationManager!) {
             locationManager.requestWhenInUseAuthorization()
         }
 
         // MARK: - AMapLocationManagerDelegate
+        // MARK: - 高德定位管理代理方法
         func amapLocationManager(_ manager: AMapLocationManager!, doRequireLocationAuth locationManager: CLLocationManager!) {
             locationManager.requestWhenInUseAuthorization()
         }
