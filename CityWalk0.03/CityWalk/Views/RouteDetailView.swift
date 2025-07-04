@@ -367,13 +367,11 @@ struct RouteDetailView_Previews: PreviewProvider {
         description: "广州是一座充满历史韵味和美食的城市。本次行程将带你领略老广的市井生活，品尝地道美食。",
         places: [
             Place(name: "恒宝广场", detail: "广州著名商圈，购物美食聚集地。", imageName: nil),
-            Place(name: "禄运茶居·手工点心(恒宝广场店)", detail: "地道广式早茶，手工点心。", imageName: nil),
             Place(name: "广州永庆坊", detail: "历史文化街区，感受老广州风情。", imageName: nil),
             Place(name: "陈家祠堂", detail: "岭南建筑代表，精美砖雕。", imageName: nil),
             Place(name: "沙面岛", detail: "欧式建筑群，拍照圣地。", imageName: nil),
             Place(name: "广州石室耶稣圣心大教堂", detail: "哥特式天主教堂，地标建筑。", imageName: nil),
-            Place(name: "赵记传承(一德路店)", detail: "地道小吃，老字号。", imageName: nil),
-            Place(name: "啫八(远洋财富商务中心店)", detail: "广式煲仔饭，风味独特。", imageName: nil)
+            Place(name: "赵记传承(一德路店)", detail: "地道小吃，老字号。", imageName: nil)
         ]
     )
     static var previews: some View {
