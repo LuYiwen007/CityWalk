@@ -9,17 +9,18 @@ struct MapView: View {
     var sharedMapState: SharedMapState? = nil // 可选的地图状态共享对象
     var routeInfo: String?
     // 新增：用于步行导航的起点和终点
-    var startCoordinate: CLLocationCoordinate2D? = nil
-    var destinationLocation: CLLocationCoordinate2D? = nil
-    @State private var destination: CLLocationCoordinate2D? = nil
+    @Binding var startCoordinate: CLLocationCoordinate2D?
+    @Binding var destinationLocation: CLLocationCoordinate2D?
     @State private var showRouteSheet: Bool = false
+    @State private var mapViewId = UUID()
     
     // 已切换为高德地图，不再需要MapCameraPosition
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .bottom) {
                 // 用高德地图替换原有MapKit地图
-                AMapViewRepresentable(routeCoordinates: nil, startCoordinate: startCoordinate, destination: .constant(destinationLocation))
+                AMapViewRepresentable(routeCoordinates: nil, startCoordinate: startCoordinate, destination: $destinationLocation)
+                    .id(mapViewId)
                     .frame(width: geometry.size.width, height: geometry.size.height)
                 // 右上角自定义定位按钮和底部分界线等UI保留
                 Rectangle()
@@ -40,6 +41,12 @@ struct MapView: View {
             if routeInfo != nil {
                 showRouteSheet = true
             }
+        }
+        .onChange(of: "\(startCoordinate?.latitude ?? 0),\(startCoordinate?.longitude ?? 0)") { _ in
+            mapViewId = UUID()
+        }
+        .onChange(of: "\(destinationLocation?.latitude ?? 0),\(destinationLocation?.longitude ?? 0)") { _ in
+            mapViewId = UUID()
         }
         .onChange(of: routeInfo) { newValue in
             showRouteSheet = newValue != nil

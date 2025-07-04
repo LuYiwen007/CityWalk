@@ -42,11 +42,11 @@ struct MessageView: View {
             // 地图始终在底层
             if !showChat {
                 if let sharedMapState = sharedMapState {
-                    MapView(isExpanded: .constant(true), isShowingProfile: .constant(false), sharedMapState: sharedMapState, routeInfo: routeToShow)
+                    MapView(isExpanded: .constant(true), isShowingProfile: .constant(false), sharedMapState: sharedMapState, routeInfo: routeToShow, startCoordinate: .constant(nil), destinationLocation: .constant(nil))
                         .ignoresSafeArea()
                         .transition(.opacity)
                 } else {
-                    MapView(isExpanded: .constant(true), isShowingProfile: .constant(false), routeInfo: routeToShow)
+                    MapView(isExpanded: .constant(true), isShowingProfile: .constant(false), routeInfo: routeToShow, startCoordinate: .constant(nil), destinationLocation: .constant(nil))
                         .ignoresSafeArea()
                         .transition(.opacity)
                 }

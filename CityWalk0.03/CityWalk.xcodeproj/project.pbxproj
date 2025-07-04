@@ -57,15 +57,11 @@
 		};
 		C76710E42DBB71A6001069C7 /* CityWalkTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = CityWalkTests;
 			sourceTree = "<group>";
 		};
 		C76710EE2DBB71A6001069C7 /* CityWalkUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = CityWalkUITests;
 			sourceTree = "<group>";
 		};
@@ -302,9 +298,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-CityWalk/Pods-CityWalk-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-CityWalk/Pods-CityWalk-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

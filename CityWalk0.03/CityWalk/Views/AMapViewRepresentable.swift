@@ -20,6 +20,7 @@ struct AMapViewRepresentable: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> UIView {
+        print("[AMap] makeUIView 被调用，startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination))")
         let container = UIView(frame: .zero)
         let mapView = MAMapView(frame: .zero)
         mapView.showsUserLocation = true
@@ -40,8 +41,17 @@ struct AMapViewRepresentable: UIViewRepresentable {
         locationManager.delegate = context.coordinator // 新增：设置delegate
         locationManager.requestLocation(withReGeocode: false) { location, _, _ in
             if let loc = location {
+                print("[AMap] makeUIView 定位到当前位置：\(loc.coordinate)")
                 mapView.setCenter(loc.coordinate, animated: false)
             }
+        }
+        // 新增：首次渲染时根据参数跳转
+        if let start = startCoordinate {
+            print("[AMap] makeUIView 首次setCenter startCoordinate=\(start)")
+            mapView.setCenter(start, animated: false)
+        } else if let dest = destination {
+            print("[AMap] makeUIView 首次setCenter destination=\(dest)")
+            mapView.setCenter(dest, animated: false)
         }
         mapView.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(mapView)
@@ -95,31 +105,49 @@ struct AMapViewRepresentable: UIViewRepresentable {
         ])
         // 优化指南针位置
         mapView.compassOrigin = CGPoint(x: container.bounds.width - 60, y: 80)
+        print("[AMap] makeUIView 结束，mapView=\(mapView)")
         return container
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        guard let mapView = context.coordinator.mapView else { return }
+        print("[AMap] updateUIView 被调用，startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination))")
+        guard let mapView = context.coordinator.mapView else { print("[AMap] updateUIView: mapView为nil"); return }
         mapView.removeOverlays(mapView.overlays)
         print("[地图] updateUIView: startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination)), 当前center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
         if let coordinates = routeCoordinates, !coordinates.isEmpty {
             var coords = coordinates
             let polyline = MAPolyline(coordinates: &coords, count: UInt(coords.count))
             mapView.add(polyline)
+            print("[AMap] updateUIView add polyline, count=\(coords.count)")
         } else if let start = startCoordinate, let dest = destination {
             print("[地图] 调用searchWalkingRoute from=\(start), to=\(dest)")
             context.coordinator.searchWalkingRoute(from: start, to: dest, on: mapView)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                print("[地图] setCenter(分段导航起点, 延迟)前 center=\(mapView.centerCoordinate), 目标=\(start), zoomLevel=\(mapView.zoomLevel)")
+                mapView.setCenter(start, animated: true)
+                let zoom = mapView.zoomLevel
+                mapView.setZoomLevel(zoom + 0.01, animated: false)
+                mapView.setZoomLevel(zoom, animated: false)
+                mapView.setNeedsDisplay()
+                print("[地图] setCenter(分段导航起点, 延迟)后 center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
+            }
         } else if let start = startCoordinate {
-            // 新增：如果只传了起点，也跳转到起点
-            print("[地图] setCenter前 center=\(mapView.centerCoordinate), 目标=\(start)")
-            mapView.setCenter(start, animated: true)
-            print("[地图] setCenter后 center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                print("[地图] setCenter(仅起点, 延迟)前 center=\(mapView.centerCoordinate), 目标=\(start), zoomLevel=\(mapView.zoomLevel)")
+                mapView.setCenter(start, animated: true)
+                let zoom = mapView.zoomLevel
+                mapView.setZoomLevel(zoom + 0.01, animated: false)
+                mapView.setZoomLevel(zoom, animated: false)
+                mapView.setNeedsDisplay()
+                print("[地图] setCenter(仅起点, 延迟)后 center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
+            }
         } else if let dest = destination {
             if let userLoc = mapView.userLocation.location?.coordinate {
                 print("[地图] 调用searchWalkingRoute from用户位置=\(userLoc), to=\(dest)")
                 context.coordinator.searchWalkingRoute(from: userLoc, to: dest, on: mapView)
             }
         }
+        print("[AMap] updateUIView 结束")
     }
 
     class Coordinator: NSObject, MAMapViewDelegate, AMapSearchDelegate, CustomSearchBarViewDelegate, AMapLocationManagerDelegate {
@@ -156,7 +184,15 @@ struct AMapViewRepresentable: UIViewRepresentable {
         @objc func locateUser() {
             guard let mapView = mapView else { return }
             if let userLoc = mapView.userLocation.location?.coordinate {
-                mapView.setCenter(userLoc, animated: true)
+                DispatchQueue.main.async {
+                    print("[地图] setCenter(定位按钮)前 center=\(mapView.centerCoordinate), 目标=\(userLoc), zoomLevel=\(mapView.zoomLevel)")
+                    mapView.setCenter(userLoc, animated: true)
+                    let zoom = mapView.zoomLevel
+                    mapView.setZoomLevel(zoom + 0.01, animated: false)
+                    mapView.setZoomLevel(zoom, animated: false)
+                    mapView.setNeedsDisplay()
+                    print("[地图] setCenter(定位按钮)后 center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
+                }
             }
         }
         // 搜索目的地
@@ -171,7 +207,15 @@ struct AMapViewRepresentable: UIViewRepresentable {
         func onPOISearchDone(_ request: AMapPOISearchBaseRequest!, response: AMapPOISearchResponse!) {
             guard let poi = response.pois.first, let mapView = mapView else { return }
             let dest = CLLocationCoordinate2D(latitude: CLLocationDegrees(poi.location.latitude), longitude: CLLocationDegrees(poi.location.longitude))
-            mapView.setCenter(dest, animated: true)
+            DispatchQueue.main.async {
+                print("[地图] setCenter(POI搜索)前 center=\(mapView.centerCoordinate), 目标=\(dest), zoomLevel=\(mapView.zoomLevel)")
+                mapView.setCenter(dest, animated: true)
+                let zoom = mapView.zoomLevel
+                mapView.setZoomLevel(zoom + 0.01, animated: false)
+                mapView.setZoomLevel(zoom, animated: false)
+                mapView.setNeedsDisplay()
+                print("[地图] setCenter(POI搜索)后 center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
+            }
             // 弹出信息卡片
             infoCardView.configure(title: poi.name, address: poi.address)
             infoCardView.isHidden = false
@@ -213,11 +257,25 @@ struct AMapViewRepresentable: UIViewRepresentable {
                 print("[地图] 步行路线已绘制，点数：\(coordinates.count)")
                 // 自动跳转到起点或终点
                 if let first = coordinates.first {
-                    mapView.setCenter(first, animated: true)
-                    print("[地图] 地图已跳转到起点：\(first)")
+                    DispatchQueue.main.async {
+                        print("[地图] setCenter(路线起点)前 center=\(mapView.centerCoordinate), 目标=\(first), zoomLevel=\(mapView.zoomLevel)")
+                        mapView.setCenter(first, animated: true)
+                        let zoom = mapView.zoomLevel
+                        mapView.setZoomLevel(zoom + 0.01, animated: false)
+                        mapView.setZoomLevel(zoom, animated: false)
+                        mapView.setNeedsDisplay()
+                        print("[地图] setCenter(路线起点)后 center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
+                    }
                 } else if let last = coordinates.last {
-                    mapView.setCenter(last, animated: true)
-                    print("[地图] 地图已跳转到终点：\(last)")
+                    DispatchQueue.main.async {
+                        print("[地图] setCenter(路线终点)前 center=\(mapView.centerCoordinate), 目标=\(last), zoomLevel=\(mapView.zoomLevel)")
+                        mapView.setCenter(last, animated: true)
+                        let zoom = mapView.zoomLevel
+                        mapView.setZoomLevel(zoom + 0.01, animated: false)
+                        mapView.setZoomLevel(zoom, animated: false)
+                        mapView.setNeedsDisplay()
+                        print("[地图] setCenter(路线终点)后 center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
+                    }
                 }
             } else {
                 print("[地图] 路线回调但steps为空")
