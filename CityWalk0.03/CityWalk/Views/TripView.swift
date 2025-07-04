@@ -329,7 +329,7 @@ struct RouteFullDetailView: View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 // 上部地图区域（2/5）
-                AMapViewRepresentable(routeCoordinates: nil, destination: .constant(nil), showSearchBar: false)
+                AMapViewRepresentable(routeCoordinates: nil, startCoordinate: nil, destination: nil, showSearchBar: false)
                     .frame(height: geometry.size.height * 0.4)
                     .clipped()
 

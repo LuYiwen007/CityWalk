@@ -18,9 +18,12 @@ struct RouteDetailView: View {
     @State private var locationManager = CLLocationManager()
     @State private var locationManagerDelegate = LocationDelegate()
     @State private var startCoordinate: CLLocationCoordinate2D? = nil // 当前分段起点
+    @State private var selectedSegment = 0 // 0为总览，1...为分段
+    var onSegmentChange: ((Int) -> Void)? = nil
     
-    init(route: Route) {
+    init(route: Route, onSegmentChange: ((Int) -> Void)? = nil) {
         self.route = route
+        self.onSegmentChange = onSegmentChange
         _places = State(initialValue: route.places)
     }
 
@@ -259,6 +262,28 @@ struct RouteDetailView: View {
             .padding(.top, 8)
             .padding(.bottom, 16)
             .padding(.horizontal)
+            // 分段切换
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    Button(action: {
+                        selectedSegment = 0
+                        onSegmentChange?(0)
+                    }) {
+                        Text("总览").fontWeight(selectedSegment == 0 ? .bold : .regular)
+                            .foregroundColor(selectedSegment == 0 ? .blue : .primary)
+                    }
+                    ForEach(1..<places.count, id: \ .self) { idx in
+                        Button(action: {
+                            selectedSegment = idx
+                            onSegmentChange?(idx)
+                        }) {
+                            Text("第\(idx)段")
+                                .fontWeight(selectedSegment == idx ? .bold : .regular)
+                                .foregroundColor(selectedSegment == idx ? .blue : .primary)
+                        }
+                    }
+                }.padding(.horizontal)
+            }.padding(.top, 8)
         }
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))

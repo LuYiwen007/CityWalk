@@ -42,7 +42,7 @@ struct PostDetailView: View {
                 .padding(.bottom, 16)
             
             // 底部地图
-            AMapViewRepresentable(routeCoordinates: routeCoordinates, destination: .constant(nil), showSearchBar: false)
+            AMapViewRepresentable(routeCoordinates: routeCoordinates, startCoordinate: nil, destination: nil, showSearchBar: false)
                 .frame(maxHeight: .infinity)
                 .cornerRadius(16)
                 .padding(.horizontal, 24)

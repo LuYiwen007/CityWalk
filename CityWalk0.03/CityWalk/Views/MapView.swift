@@ -8,18 +8,20 @@ struct MapView: View {
     @Binding var isShowingProfile: Bool // 控制是否显示用户资料
     var sharedMapState: SharedMapState? = nil // 可选的地图状态共享对象
     var routeInfo: String?
-    // 新增：用于步行导航的起点和终点
-    @Binding var startCoordinate: CLLocationCoordinate2D?
-    @Binding var destinationLocation: CLLocationCoordinate2D?
+    let startCoordinate: CLLocationCoordinate2D?
+    let destinationLocation: CLLocationCoordinate2D?
+    var routeCoordinates: [CLLocationCoordinate2D]? = nil // polyline
+    var centerCoordinate: CLLocationCoordinate2D? = nil // 新增地图中心
     @State private var showRouteSheet: Bool = false
     @State private var mapViewId = UUID()
     
     // 已切换为高德地图，不再需要MapCameraPosition
     var body: some View {
-        GeometryReader { geometry in
+        print("[MapView] 渲染，startCoordinate=\(String(describing: startCoordinate))")
+        return GeometryReader { geometry in
             ZStack(alignment: .bottom) {
                 // 用高德地图替换原有MapKit地图
-                AMapViewRepresentable(routeCoordinates: nil, startCoordinate: startCoordinate, destination: $destinationLocation)
+                AMapViewRepresentable(routeCoordinates: routeCoordinates, startCoordinate: startCoordinate, destination: destinationLocation, centerCoordinate: centerCoordinate)
                     .id(mapViewId)
                     .frame(width: geometry.size.width, height: geometry.size.height)
                 // 右上角自定义定位按钮和底部分界线等UI保留
@@ -42,12 +44,10 @@ struct MapView: View {
                 showRouteSheet = true
             }
         }
-        .onChange(of: "\(startCoordinate?.latitude ?? 0),\(startCoordinate?.longitude ?? 0)") { _ in
-            mapViewId = UUID()
-        }
-        .onChange(of: "\(destinationLocation?.latitude ?? 0),\(destinationLocation?.longitude ?? 0)") { _ in
-            mapViewId = UUID()
-        }
+        .onChange(of: centerCoordinate?.latitude) { _ in mapViewId = UUID() }
+        .onChange(of: centerCoordinate?.longitude) { _ in mapViewId = UUID() }
+        .onChange(of: routeCoordinates?.first?.latitude) { _ in mapViewId = UUID() }
+        .onChange(of: routeCoordinates?.last?.longitude) { _ in mapViewId = UUID() }
         .onChange(of: routeInfo) { newValue in
             showRouteSheet = newValue != nil
         }

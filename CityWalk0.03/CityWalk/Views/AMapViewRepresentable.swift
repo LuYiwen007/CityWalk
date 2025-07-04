@@ -7,10 +7,12 @@ import AMapLocationKit
 struct AMapViewRepresentable: UIViewRepresentable {
     // 支持外部传入路线点串
     var routeCoordinates: [CLLocationCoordinate2D]?
-    // 新增：可选的起点坐标（用于分段导航）
-    var startCoordinate: CLLocationCoordinate2D? = nil
-    // 新增：可选的目的地坐标（用于手动导航）
-    @Binding var destination: CLLocationCoordinate2D?
+    // startCoordinate 改为 let
+    let startCoordinate: CLLocationCoordinate2D?
+    // destination 改为 let
+    let destination: CLLocationCoordinate2D?
+    // 新增：地图中心坐标
+    var centerCoordinate: CLLocationCoordinate2D? = nil
     // 新增：搜索回调
     var onSearch: ((String) -> Void)? = nil
     var showSearchBar: Bool = true
@@ -20,7 +22,7 @@ struct AMapViewRepresentable: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> UIView {
-        print("[AMap] makeUIView 被调用，startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination))")
+        print("[AMapViewRepresentable] makeUIView 被调用，startCoordinate类型=\(type(of: startCoordinate)), startCoordinate=\(String(describing: startCoordinate))")
         let container = UIView(frame: .zero)
         let mapView = MAMapView(frame: .zero)
         mapView.showsUserLocation = true
@@ -45,12 +47,13 @@ struct AMapViewRepresentable: UIViewRepresentable {
                 mapView.setCenter(loc.coordinate, animated: false)
             }
         }
-        // 新增：首次渲染时根据参数跳转
+        // 只要 startCoordinate 不为 nil，就 setCenter 到该点，实现和天安门跳转一样的效果
         if let start = startCoordinate {
-            print("[AMap] makeUIView 首次setCenter startCoordinate=\(start)")
+            print("[AMapViewRepresentable] setCenter 前，start=\(start)")
             mapView.setCenter(start, animated: false)
+            print("[AMapViewRepresentable] setCenter 后，mapView.centerCoordinate=\(mapView.centerCoordinate)")
         } else if let dest = destination {
-            print("[AMap] makeUIView 首次setCenter destination=\(dest)")
+            print("[AMap] makeUIView setCenter destination=\(dest)")
             mapView.setCenter(dest, animated: false)
         }
         mapView.translatesAutoresizingMaskIntoConstraints = false
@@ -110,41 +113,26 @@ struct AMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        print("[AMap] updateUIView 被调用，startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination))")
+        print("[AMap] updateUIView 被调用，startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination)), centerCoordinate=\(String(describing: centerCoordinate))")
         guard let mapView = context.coordinator.mapView else { print("[AMap] updateUIView: mapView为nil"); return }
         mapView.removeOverlays(mapView.overlays)
-        print("[地图] updateUIView: startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination)), 当前center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
+        print("[地图] updateUIView: startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination)), centerCoordinate=\(String(describing: centerCoordinate)), 当前center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
         if let coordinates = routeCoordinates, !coordinates.isEmpty {
             var coords = coordinates
             let polyline = MAPolyline(coordinates: &coords, count: UInt(coords.count))
             mapView.add(polyline)
             print("[AMap] updateUIView add polyline, count=\(coords.count)")
-        } else if let start = startCoordinate, let dest = destination {
-            print("[地图] 调用searchWalkingRoute from=\(start), to=\(dest)")
-            context.coordinator.searchWalkingRoute(from: start, to: dest, on: mapView)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                print("[地图] setCenter(分段导航起点, 延迟)前 center=\(mapView.centerCoordinate), 目标=\(start), zoomLevel=\(mapView.zoomLevel)")
-                mapView.setCenter(start, animated: true)
-                let zoom = mapView.zoomLevel
-                mapView.setZoomLevel(zoom + 0.01, animated: false)
-                mapView.setZoomLevel(zoom, animated: false)
-                mapView.setNeedsDisplay()
-                print("[地图] setCenter(分段导航起点, 延迟)后 center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
-            }
-        } else if let start = startCoordinate {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                print("[地图] setCenter(仅起点, 延迟)前 center=\(mapView.centerCoordinate), 目标=\(start), zoomLevel=\(mapView.zoomLevel)")
-                mapView.setCenter(start, animated: true)
-                let zoom = mapView.zoomLevel
-                mapView.setZoomLevel(zoom + 0.01, animated: false)
-                mapView.setZoomLevel(zoom, animated: false)
-                mapView.setNeedsDisplay()
-                print("[地图] setCenter(仅起点, 延迟)后 center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
-            }
-        } else if let dest = destination {
-            if let userLoc = mapView.userLocation.location?.coordinate {
-                print("[地图] 调用searchWalkingRoute from用户位置=\(userLoc), to=\(dest)")
-                context.coordinator.searchWalkingRoute(from: userLoc, to: dest, on: mapView)
+        }
+        // 新增：每次 startCoordinate 变化都 setCenter
+        if let start = startCoordinate {
+            print("[AMap] updateUIView setCenter startCoordinate=\(start)")
+            mapView.setCenter(start, animated: false)
+        }
+        // 新增：根据centerCoordinate跳转地图中心
+        if let center = centerCoordinate {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                print("[地图] setCenter(centerCoordinate) center=\(center)")
+                mapView.setCenter(center, animated: true)
             }
         }
         print("[AMap] updateUIView 结束")
