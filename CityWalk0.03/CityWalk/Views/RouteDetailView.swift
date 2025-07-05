@@ -4,6 +4,8 @@ import CoreLocation
 
 struct RouteDetailView: View {
     let route: Route
+    @Binding var selectedPlaceIndex: Int // 新增
+    var onPlaceChange: ((Int, CLLocationCoordinate2D?) -> Void)? = nil // 新增
     
     @State private var selectedTab = 0 // 0 表示总览，1...表示各个地点
     @State private var places: [Place]
@@ -21,8 +23,15 @@ struct RouteDetailView: View {
     @State private var selectedSegment = 0 // 0为总览，1...为分段
     var onSegmentChange: ((Int) -> Void)? = nil
     
-    init(route: Route, onSegmentChange: ((Int) -> Void)? = nil) {
+    init(
+        route: Route,
+        selectedPlaceIndex: Binding<Int>,
+        onPlaceChange: ((Int, CLLocationCoordinate2D?) -> Void)? = nil,
+        onSegmentChange: ((Int) -> Void)? = nil
+    ) {
         self.route = route
+        self._selectedPlaceIndex = selectedPlaceIndex
+        self.onPlaceChange = onPlaceChange
         self.onSegmentChange = onSegmentChange
         _places = State(initialValue: route.places)
     }
@@ -56,6 +65,8 @@ struct RouteDetailView: View {
                                     // 总览tab
                                     Button(action: {
                                         selectedTab = 0
+                                        selectedPlaceIndex = 0 // 新增
+                                        onPlaceChange?(0, places.first?.coordinate)
                                     }) {
                                         VStack(spacing: 4) {
                                             Text("总览")
@@ -72,6 +83,8 @@ struct RouteDetailView: View {
                                     ForEach(Array(places.enumerated()), id: \ .offset) { index, place in
                                         Button(action: {
                                             selectedTab = index + 1
+                                            selectedPlaceIndex = index // 新增
+                                            onPlaceChange?(index, place.coordinate)
                                         }) {
                                             VStack(spacing: 4) {
                                                 Text(place.name)
@@ -391,15 +404,51 @@ struct RouteDetailView_Previews: PreviewProvider {
         author: "小明",
         description: "广州是一座充满历史韵味和美食的城市。本次行程将带你领略老广的市井生活，品尝地道美食。",
         places: [
-            Place(name: "恒宝广场", detail: "广州著名商圈，购物美食聚集地。", imageName: nil),
-            Place(name: "广州永庆坊", detail: "历史文化街区，感受老广州风情。", imageName: nil),
-            Place(name: "陈家祠堂", detail: "岭南建筑代表，精美砖雕。", imageName: nil),
-            Place(name: "沙面岛", detail: "欧式建筑群，拍照圣地。", imageName: nil),
-            Place(name: "广州石室耶稣圣心大教堂", detail: "哥特式天主教堂，地标建筑。", imageName: nil),
-            Place(name: "赵记传承(一德路店)", detail: "地道小吃，老字号。", imageName: nil)
+            Place(
+                name: "恒宝广场",
+                detail: "广州著名商圈，购物美食聚集地。",
+                imageName: nil,
+                coordinate: CLLocationCoordinate2D(latitude: 23.1252, longitude: 113.2625)
+            ),
+            Place(
+                name: "广州永庆坊",
+                detail: "历史文化街区，感受老广州风情。",
+                imageName: nil,
+                coordinate: CLLocationCoordinate2D(latitude: 23.1195, longitude: 113.2590)
+            ),
+            Place(
+                name: "陈家祠堂",
+                detail: "岭南建筑代表，精美砖雕。",
+                imageName: nil,
+                coordinate: CLLocationCoordinate2D(latitude: 23.1280, longitude: 113.2437)
+            ),
+            Place(
+                name: "沙面岛",
+                detail: "欧式建筑群，拍照圣地。",
+                imageName: nil,
+                coordinate: CLLocationCoordinate2D(latitude: 23.1086, longitude: 113.2396)
+            ),
+            Place(
+                name: "广州石室耶稣圣心大教堂",
+                detail: "哥特式天主教堂，地标建筑。",
+                imageName: nil,
+                coordinate: CLLocationCoordinate2D(latitude: 23.1168, longitude: 113.2645)
+            ),
+            Place(
+                name: "赵记传承(一德路店)",
+                detail: "地道小吃，老字号。",
+                imageName: nil,
+                coordinate: CLLocationCoordinate2D(latitude: 23.1201, longitude: 113.2598)
+            )
         ]
     )
+    @State static var selectedPlaceIndex: Int = 0
     static var previews: some View {
-        RouteDetailView(route: mockRoute)
+        RouteDetailView(
+            route: mockRoute,
+            selectedPlaceIndex: .constant(0),
+            onPlaceChange: { _, _ in },
+            onSegmentChange: { _ in }
+        )
     }
 } 

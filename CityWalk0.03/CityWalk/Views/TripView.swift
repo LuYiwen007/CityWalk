@@ -323,6 +323,8 @@ struct TripCardView: View {
 
 // 复合详情页：上地图下详情
 struct RouteFullDetailView: View {
+    @State private var selectedPlaceIndex: Int = 0
+
     let route: Route
     @Environment(\.dismiss) private var dismiss
     var body: some View {
@@ -335,9 +337,14 @@ struct RouteFullDetailView: View {
 
                 // 下部详情内容（3/5）
                 ZStack(alignment: .bottom) {
-                    RouteDetailView(route: route)
-                        .frame(height: geometry.size.height * 0.6)
-                        .background(Color.white)
+                    RouteDetailView(
+                        route: route,
+                        selectedPlaceIndex: $selectedPlaceIndex,
+                        onPlaceChange: { _, _ in },
+                        onSegmentChange: { _ in }
+                    )
+                    .frame(height: geometry.size.height * 0.6)
+                    .background(Color.white)
                 }
             }
             .edgesIgnoringSafeArea(.top)

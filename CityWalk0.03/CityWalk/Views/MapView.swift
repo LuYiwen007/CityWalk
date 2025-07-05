@@ -8,20 +8,22 @@ struct MapView: View {
     @Binding var isShowingProfile: Bool // 控制是否显示用户资料
     var sharedMapState: SharedMapState? = nil // 可选的地图状态共享对象
     var routeInfo: String?
-    let startCoordinate: CLLocationCoordinate2D?
     let destinationLocation: CLLocationCoordinate2D?
     var routeCoordinates: [CLLocationCoordinate2D]? = nil // polyline
     var centerCoordinate: CLLocationCoordinate2D? = nil // 新增地图中心
     @State private var showRouteSheet: Bool = false
     @State private var mapViewId = UUID()
+    // 新增：支持外部切换Place
+    @Binding var selectedPlaceIndex: Int
+    @Binding var startCoordinateBinding: CLLocationCoordinate2D?
     
     // 已切换为高德地图，不再需要MapCameraPosition
     var body: some View {
-        print("[MapView] 渲染，startCoordinate=\(String(describing: startCoordinate))")
+        print("[MapView] 渲染，startCoordinate=\(String(describing: startCoordinateBinding))")
         return GeometryReader { geometry in
             ZStack(alignment: .bottom) {
                 // 用高德地图替换原有MapKit地图
-                AMapViewRepresentable(routeCoordinates: routeCoordinates, startCoordinate: startCoordinate, destination: destinationLocation, centerCoordinate: centerCoordinate)
+                AMapViewRepresentable(routeCoordinates: routeCoordinates, startCoordinate: startCoordinateBinding, destination: destinationLocation, centerCoordinate: centerCoordinate)
                     .id(mapViewId)
                     .frame(width: geometry.size.width, height: geometry.size.height)
                 // 右上角自定义定位按钮和底部分界线等UI保留
@@ -34,7 +36,9 @@ struct MapView: View {
         }
         .sheet(isPresented: $showRouteSheet) {
             if let routeInfo = routeInfo {
-                RouteDetailView(route: RouteDetailView_Previews.mockRoute)
+                RouteDetailView(route: RouteDetailView_Previews.mockRoute, selectedPlaceIndex: $selectedPlaceIndex, onPlaceChange: { idx, coord in
+                    startCoordinateBinding = coord
+                })
                     .presentationDetents([.height(UIScreen.main.bounds.height * 0.6), .large])
                     .presentationDragIndicator(.visible)
             }

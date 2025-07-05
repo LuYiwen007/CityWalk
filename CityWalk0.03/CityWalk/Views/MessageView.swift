@@ -27,6 +27,9 @@ struct MessageView: View {
     private let minMapHeight: CGFloat = UIScreen.main.bounds.height * 0.5
     private let maxMapHeight: CGFloat = UIScreen.main.bounds.height * 0.5
     private let defaultMapHeight: CGFloat = UIScreen.main.bounds.height * 0.5
+    // 新增：用于地图和路线详情联动
+    @State private var selectedPlaceIndex: Int = 0
+    @State private var startCoordinate: CLLocationCoordinate2D? = nil
     
     // 主体视图，渲染聊天界面、消息列表、地图弹窗、输入区等
     var body: some View {
@@ -42,13 +45,28 @@ struct MessageView: View {
             // 地图始终在底层
             if !showChat {
                 if let sharedMapState = sharedMapState {
-                    MapView(isExpanded: .constant(true), isShowingProfile: .constant(false), sharedMapState: sharedMapState, routeInfo: routeToShow, startCoordinate: nil, destinationLocation: nil)
-                        .ignoresSafeArea()
-                        .transition(.opacity)
+                    MapView(
+                        isExpanded: .constant(true),
+                        isShowingProfile: .constant(false),
+                        sharedMapState: sharedMapState,
+                        routeInfo: routeToShow,
+                        destinationLocation: nil,
+                        selectedPlaceIndex: $selectedPlaceIndex,
+                        startCoordinateBinding: $startCoordinate
+                    )
+                    .ignoresSafeArea()
+                    .transition(.opacity)
                 } else {
-                    MapView(isExpanded: .constant(true), isShowingProfile: .constant(false), routeInfo: routeToShow, startCoordinate: nil, destinationLocation: nil)
-                        .ignoresSafeArea()
-                        .transition(.opacity)
+                    MapView(
+                        isExpanded: .constant(true),
+                        isShowingProfile: .constant(false),
+                        routeInfo: routeToShow,
+                        destinationLocation: nil,
+                        selectedPlaceIndex: $selectedPlaceIndex,
+                        startCoordinateBinding: $startCoordinate
+                    )
+                    .ignoresSafeArea()
+                    .transition(.opacity)
                 }
             }
             // 聊天主页面

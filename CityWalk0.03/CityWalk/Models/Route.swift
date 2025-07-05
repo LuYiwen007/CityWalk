@@ -1,10 +1,12 @@
 import Foundation
+import CoreLocation
 
 struct Place: Identifiable {
     let id = UUID()
     let name: String
     let detail: String
     let imageName: String? // 可选图片名
+    let coordinate: CLLocationCoordinate2D?
 }
 
 struct Route: Identifiable {
