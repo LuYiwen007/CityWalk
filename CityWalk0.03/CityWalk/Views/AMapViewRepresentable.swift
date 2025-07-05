@@ -40,7 +40,7 @@ struct AMapViewRepresentable: UIViewRepresentable {
         mapView.isScrollEnabled = true
         mapView.isZoomEnabled = true
         AMapServices.shared().enableHTTPS = true
-        AMapServices.shared().apiKey = "fe318d0463aac4edaa94170b858dd6a0"
+        AMapServices.shared().apiKey = "ea6ffe534577fb90a8ce52a72c0aa121"
         context.coordinator.mapView = mapView
         // 主动请求系统定位权限
         let clManager = CLLocationManager()
