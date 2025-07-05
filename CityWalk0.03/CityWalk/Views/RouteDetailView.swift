@@ -261,7 +261,7 @@ struct RouteDetailView: View {
                 }) {
                     HStack {
                         Image(systemName: isNavigating ? "location.north.line" : "location")
-                        Text(navigationIndex == nil ? "开始导航" : (navigationIndex! < places.count - 1 ? "继续导航" : "已完成"))
+                        Text("查看路线")
                             .fontWeight(.semibold)
                     }
                 }
@@ -408,37 +408,43 @@ struct RouteDetailView_Previews: PreviewProvider {
                 name: "恒宝广场",
                 detail: "广州著名商圈，购物美食聚集地。",
                 imageName: nil,
-                coordinate: CLLocationCoordinate2D(latitude: 23.1252, longitude: 113.2625)
+                coordinate: CLLocationCoordinate2D(latitude: 23.1252, longitude: 113.2625),
+                nextCoordinate: CLLocationCoordinate2D(latitude: 23.1195, longitude: 113.2590)
             ),
             Place(
                 name: "广州永庆坊",
                 detail: "历史文化街区，感受老广州风情。",
                 imageName: nil,
-                coordinate: CLLocationCoordinate2D(latitude: 23.1195, longitude: 113.2590)
+                coordinate: CLLocationCoordinate2D(latitude: 23.1195, longitude: 113.2590),
+                nextCoordinate: CLLocationCoordinate2D(latitude: 23.1280, longitude: 113.2437)
             ),
             Place(
                 name: "陈家祠堂",
                 detail: "岭南建筑代表，精美砖雕。",
                 imageName: nil,
-                coordinate: CLLocationCoordinate2D(latitude: 23.1280, longitude: 113.2437)
+                coordinate: CLLocationCoordinate2D(latitude: 23.1280, longitude: 113.2437),
+                nextCoordinate: CLLocationCoordinate2D(latitude: 23.1086, longitude: 113.2396)
             ),
             Place(
                 name: "沙面岛",
                 detail: "欧式建筑群，拍照圣地。",
                 imageName: nil,
-                coordinate: CLLocationCoordinate2D(latitude: 23.1086, longitude: 113.2396)
+                coordinate: CLLocationCoordinate2D(latitude: 23.1086, longitude: 113.2396),
+                nextCoordinate: CLLocationCoordinate2D(latitude: 23.1168, longitude: 113.2645)
             ),
             Place(
                 name: "广州石室耶稣圣心大教堂",
                 detail: "哥特式天主教堂，地标建筑。",
                 imageName: nil,
-                coordinate: CLLocationCoordinate2D(latitude: 23.1168, longitude: 113.2645)
+                coordinate: CLLocationCoordinate2D(latitude: 23.1168, longitude: 113.2645),
+                nextCoordinate: CLLocationCoordinate2D(latitude: 23.1201, longitude: 113.2598)
             ),
             Place(
                 name: "赵记传承(一德路店)",
                 detail: "地道小吃，老字号。",
                 imageName: nil,
-                coordinate: CLLocationCoordinate2D(latitude: 23.1201, longitude: 113.2598)
+                coordinate: CLLocationCoordinate2D(latitude: 23.1201, longitude: 113.2598),
+                nextCoordinate: nil
             )
         ]
     )

@@ -7,6 +7,7 @@ struct Place: Identifiable {
     let detail: String
     let imageName: String? // 可选图片名
     let coordinate: CLLocationCoordinate2D?
+    let nextCoordinate: CLLocationCoordinate2D? // 下一个地点的经纬度
 }
 
 struct Route: Identifiable {
