@@ -8,112 +8,195 @@ struct PostDetailView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer().frame(height: 36) // 让图片整体下移
-            Image(post.imageName)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 220)
-                .clipped()
-                .cornerRadius(16)
-                .padding(.horizontal, 12)
-            // 用户栏
-            HStack {
-                Image(post.authorImageName)
-                    .resizable()
-                    .frame(width: 36, height: 36)
-                    .clipShape(Circle())
-                Text(post.authorName)
-                    .font(.system(size: 16, weight: .bold))
-                Spacer()
-                Button(action: {}) {
-                    Text("Follow")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 6)
-                        .background(Color.blue)
-                        .cornerRadius(16)
+        ScrollView {
+            VStack(spacing: 0) {
+                // 顶部图片
+                GeometryReader { geometry in
+                    Image(post.imageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geometry.size.width, height: 280)
+                        .clipped()
                 }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            // 帖子正文
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
+                .frame(height: 280)
+                
+                // 内容区域
+                VStack(spacing: 0) {
+                    // 用户信息栏
+                    HStack(spacing: 12) {
+                        Image(post.authorImageName)
+                            .resizable()
+                            .frame(width: 44, height: 44)
+                            .clipShape(Circle())
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(post.authorName)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                            Text("2小时前")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        Button(action: {}) {
+                            Text("关注")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.pink, Color.orange],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .cornerRadius(20)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    
                     // 标题
-                    Text("米亚罗风景区太后悔了！！！后悔没早点来！")
-                        .font(.system(size: 18, weight: .bold))
-                        .padding(.bottom, 2)
-                    // 副标题
-                    Text("米亚罗风景区真的真的真的太太太漂亮了！稻城亚丁雪山景平替，再也不用去那么远就能看到雪山了。")
-                        .font(.system(size: 16, weight: .medium))
-                        .padding(.bottom, 2)
-                    // 攻略标题
-                    HStack(spacing: 4) {
-                        Text("📌米亚罗景区攻略📕")
-                            .font(.system(size: 16, weight: .bold))
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("米亚罗风景区太后悔了！！！")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        
+                        Text("后悔没早点来！米亚罗风景区真的真的真的太太太漂亮了！稻城亚丁雪山景平替，再也不用去那么远就能看到雪山了。")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary)
+                            .lineSpacing(4)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    // 1.景点介绍
-                    Group {
-                        Text("1.景点介绍：")
-                            .font(.system(size: 16, weight: .bold))
-                        + Text("米亚罗，这个藏语意为\"好玩的坝子\"的地方，位于四川省阿坝藏族羌族自治州理县境内，是中国最大的红叶风景区之一。每到秋天，这里的红叶如火，层林尽染，美不胜收。")
-                            .font(.system(size: 16))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+                    
+                    // 攻略内容
+                    VStack(alignment: .leading, spacing: 20) {
+                        // 景点介绍
+                        ContentSection(
+                            icon: "📍",
+                            title: "景点介绍",
+                            content: "米亚罗，藏语意为\"好玩的坝子\"，位于四川省阿坝藏族羌族自治州理县境内，是中国最大的红叶风景区之一。每到秋天，这里的红叶如火，层林尽染，美不胜收。"
+                        )
+                        
+                        // 交通指南
+                        ContentSection(
+                            icon: "🚗",
+                            title: "交通指南",
+                            content: "导航直接搜猛古村，到了之后分徒步和开车上山两种方式。徒步单边大概3小时，开车约40分钟。进山费用20元/人，需签协议书。山路较颠簸，建议SUV或越野车。"
+                        )
+                        
+                        // 住宿推荐
+                        ContentSection(
+                            icon: "🏠",
+                            title: "住宿推荐",
+                            content: "猛古村住宿选择较少，建议前往米亚罗镇，从客栈到酒店应有尽有。旺季建议提前在网上预订。"
+                        )
+                        
+                        // 美食贴士
+                        ContentSection(
+                            icon: "🍽️",
+                            title: "美食贴士",
+                            content: "进山后无餐厅，请自备食物和水。猛古村有小卖部，但商品有限。建议提前准备充足的食物。"
+                        )
+                        
+                                                 // 温馨提示
+                         VStack(alignment: .leading, spacing: 8) {
+                             HStack(spacing: 8) {
+                                 Text("💡")
+                                     .font(.system(size: 16))
+                                 Text("温馨提示")
+                                     .font(.system(size: 16, weight: .semibold))
+                                     .foregroundColor(.orange)
+                             }
+                             Text("米亚罗地处高海拔地区，气候多变，请务必带上足够的衣物以应对可能的低温天气。")
+                                 .font(.system(size: 15))
+                                 .foregroundColor(.secondary)
+                                 .padding(.leading, 24)
+                                 .fixedSize(horizontal: false, vertical: true)
+                         }
+                         .padding(.horizontal, 16)
+                         .padding(.vertical, 12)
+                         .background(Color.orange.opacity(0.1))
+                         .cornerRadius(12)
                     }
-                    // 2.交通
-                    Group {
-                        Text("2.交通：")
-                            .font(.system(size: 16, weight: .bold))
-                        + Text("导航直接搜猛古村，到了之后分徒步和开车上山两种方式，看其他博主分享的徒步上山的话单边大概是3小时，徒步的话可以看到很多风景肯定也不错，但是我跟朋友是大懒鬼，果断选择开车上山[doge]  寨子里面的人说车可以直接开到虞美措这个湖这里，但是开车要做好心理准备就是路真的超级超级超级烂，全是大大小小的坑，一路都是大大小小的石头，开越野车或者SUV倒不是太担心，进山的费用一个人20元，要签协议书不能抽烟不能有明火之类的，进山之后手机就没有信号了，开车上去大概40分钟左右")
-                            .font(.system(size: 16))
+                    .padding(.horizontal, 20)
+                    .padding(.top, 24)
+                    
+                    // 互动区域
+                    HStack(spacing: 32) {
+                        InteractionButton(icon: "heart", count: post.likes, color: .pink)
+                        InteractionButton(icon: "bubble.right", count: 44, color: .blue)
+                        InteractionButton(icon: "star", count: 208, color: .orange)
+                        Spacer()
+                        Button(action: {}) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 20))
+                                .foregroundColor(.primary)
+                        }
                     }
-                    // 3.住宿推荐
-                    Group {
-                        Text("3.住宿推荐：")
-                            .font(.system(size: 16, weight: .bold))
-                        + Text("个人感觉猛古村没有什么住的地方，可以再往前开到米亚罗镇，从客栈到酒店应有尽有，旺季的话尽量提前在网上订好")
-                            .font(.system(size: 16))
-                    }
-                    // 4.美食
-                    Group {
-                        Text("4.美食：")
-                            .font(.system(size: 16, weight: .bold))
-                        + Text("如果要去那片湖的话请自备吃的，因为进山之后就什么都没有了，猛古村里面有一个小卖部但是只买点面包和水，其他都没有，所以一定一定要提前准备，我们上去之后都看到有人在扎帐篷露营")
-                            .font(.system(size: 16))
-                    }
-                    // 小贴士
-                    Group {
-                        Text("小贴士：")
-                            .font(.system(size: 16, weight: .bold))
-                        + Text("米亚罗地处高海拔地区，气候多变，请务必带上足够的衣物以应对可能的低温天气。")
-                            .font(.system(size: 16))
-                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 32)
+                    .padding(.bottom, 40)
                 }
-                .foregroundColor(.primary)
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .background(Color(.systemBackground))
+                .cornerRadius(20, corners: [.topLeft, .topRight])
+                .offset(y: -20)
             }
-            // 点赞评论收藏区
-            HStack(spacing: 24) {
-                HStack(spacing: 4) {
-                    Image(systemName: "heart")
-                    Text("\(post.likes)")
-                }
-                HStack(spacing: 4) {
-                    Image(systemName: "bubble.right")
-                    Text("44")
-                }
-                HStack(spacing: 4) {
-                    Image(systemName: "star")
-                    Text("208")
-                }
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
         }
+        .ignoresSafeArea(edges: .top)
         .background(Color(.systemGroupedBackground))
+    }
+}
+
+// 内容区块组件
+struct ContentSection: View {
+    let icon: String
+    let title: String
+    let content: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Text(icon)
+                    .font(.system(size: 16))
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+            Text(content)
+                .font(.system(size: 15))
+                .foregroundColor(.secondary)
+                .lineSpacing(3)
+                .padding(.leading, 24)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+// 互动按钮组件
+struct InteractionButton: View {
+    let icon: String
+    let count: Int
+    let color: Color
+    
+    var body: some View {
+        Button(action: {}) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                Text("\(count)")
+                    .font(.system(size: 16, weight: .medium))
+            }
+            .foregroundColor(color)
+        }
     }
 }
 

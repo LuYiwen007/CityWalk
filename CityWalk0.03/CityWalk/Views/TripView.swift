@@ -117,14 +117,28 @@ struct TripView: View {
                 Divider()
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 32) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 20) {
+                            Text("日历视图")
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(.primary)
+                                .padding(.horizontal, 24)
+                                .padding(.top, 36)
+                                // 日历视图
+                                CityWalkCalendarView(
+                                    year: 2025,
+                                    month: 7,
+                                    historyDays: [2,3,4,5], // mock: 这些天有CityWalk
+                                    selectedDay: 5 // mock: 当前高亮
+                                )    
+                        }
                         // 历史行程
                         VStack(alignment: .leading, spacing: 20) {
                             Text("历史行程")
                                 .font(.system(size: 22, weight: .bold))
                                 .foregroundColor(.primary)
                                 .padding(.horizontal, 24)
-                                .padding(.top, 36)
+                                .padding(.top, 8)
 
                             VStack(spacing: 24) {
                                 ForEach(historyTrips.sorted(by: { $0.date > $1.date })) { trip in
