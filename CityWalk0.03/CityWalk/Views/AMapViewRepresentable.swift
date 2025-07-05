@@ -168,6 +168,9 @@ struct AMapViewRepresentable: UIViewRepresentable {
         // 新增：缓存上一次路线起终点，避免重复请求
         var lastRouteStart: CLLocationCoordinate2D? = nil
         var lastRouteDest: CLLocationCoordinate2D? = nil
+        // 新增：缓存起点和终点标注
+        var startAnnotation: MAPointAnnotation?
+        var endAnnotation: MAPointAnnotation?
         
         init(_ parent: AMapViewRepresentable) {
             self.parent = parent
@@ -262,6 +265,28 @@ struct AMapViewRepresentable: UIViewRepresentable {
                 mapView.removeOverlays(mapView.overlays)
                 mapView.add(polyline)
                 print("[地图] 步行路线已绘制，点数：\(coordinates.count)")
+                // 新增：移除旧的起点和终点标注
+                if let startAnno = self.startAnnotation {
+                    mapView.removeAnnotation(startAnno)
+                }
+                if let endAnno = self.endAnnotation {
+                    mapView.removeAnnotation(endAnno)
+                }
+                // 新增：添加新的起点和终点标注
+                if let first = coordinates.first {
+                    let startAnno = MAPointAnnotation()
+                    startAnno.coordinate = first
+                    startAnno.title = "起点"
+                    mapView.addAnnotation(startAnno)
+                    self.startAnnotation = startAnno
+                }
+                if let last = coordinates.last {
+                    let endAnno = MAPointAnnotation()
+                    endAnno.coordinate = last
+                    endAnno.title = "终点"
+                    mapView.addAnnotation(endAnno)
+                    self.endAnnotation = endAnno
+                }
                 // 自动跳转到起点或终点
                 if let first = coordinates.first {
                     DispatchQueue.main.async {
