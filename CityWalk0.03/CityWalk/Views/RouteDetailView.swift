@@ -268,6 +268,7 @@ struct RouteDetailView: View {
                             destinationLocation = dest
                             isNavigating = true
                             print("[按钮] 已设置 startCoordinate=\(start), destinationLocation=\(dest)")
+                            dismiss() // 新增：点击后自动下拉隐藏页面
                         } else {
                             print("[按钮] start 或 dest 为空，无法绘制路线")
                         }

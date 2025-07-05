@@ -52,6 +52,10 @@ struct MapView: View {
             if routeInfo != nil {
                 showRouteSheet = true
             }
+            // 监听“ShowRouteDetailSheet”通知
+            NotificationCenter.default.addObserver(forName: NSNotification.Name("ShowRouteDetailSheet"), object: nil, queue: .main) { _ in
+                showRouteSheet = true
+            }
         }
         .onChange(of: centerCoordinate?.latitude) { _ in mapViewId = UUID() }
         .onChange(of: centerCoordinate?.longitude) { _ in mapViewId = UUID() }

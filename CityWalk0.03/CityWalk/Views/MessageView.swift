@@ -69,6 +69,40 @@ struct MessageView: View {
                     .ignoresSafeArea()
                     .transition(.opacity)
                 }
+                // 右下角按钮区：回到路线详情+聊天小圆圈
+                HStack(spacing: 16) {
+                    Button(action: {
+                        // 拉起路线详情
+                        routeToShow = "推荐路线"
+                        NotificationCenter.default.post(name: NSNotification.Name("ShowRouteDetailSheet"), object: nil)
+                    }) {
+                        Image(systemName: "list.bullet.rectangle")
+                            .font(.system(size: 23, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 50, height: 50)
+                            .background(Color.blue)
+                            .clipShape(Circle())
+                            .shadow(radius: 4)
+                    }
+                    Button(action: {
+                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                            isChatMinimized = false
+                            showChat = true
+                            routeToShow = nil
+                        }
+                    }) {
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 23, weight: .bold))
+                            .frame(width: 50, height: 50)
+                            .background(Color.blue)
+                            .clipShape(Circle())
+                            .shadow(radius: 4)
+                    }
+                }
+                .padding(.trailing, 17)
+                .padding(.bottom, 30)
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
             // 聊天主页面
             if showChat {
@@ -288,40 +322,6 @@ struct MessageView: View {
                         }
                     }
                 }
-            } else if isChatMinimized {
-                // 只显示小圆圈
-                Circle()
-                    .fill(Color.blue)
-                    .frame(width: 44, height: 44)
-                    .overlay(
-                        Image(systemName: "bubble.left.and.bubble.right.fill")
-                            .foregroundColor(.white)
-                            .font(.system(size: 16, weight: .bold))
-                    )
-                    .padding(18)
-                    .shadow(radius: 6)
-                    .offset(dragOffset)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                let minY: CGFloat = 44
-                                let maxY: CGFloat = UIScreen.main.bounds.height - 48 - 44
-                                let newY = value.translation.height + dragOffset.height
-                                if newY >= minY && newY <= maxY {
-                                    dragOffset = CGSize(width: value.translation.width, height: value.translation.height)
-                                }
-                            }
-                            .onEnded { value in
-                                dragOffset = CGSize(width: dragOffset.width + value.translation.width, height: value.translation.height)
-                            }
-                    )
-                    .onTapGesture {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                            isChatMinimized = false
-                            showChat = true
-                            routeToShow = nil // 返回聊天时，重置路线信息
-                        }
-                    }
             }
         }
         .onAppear {
