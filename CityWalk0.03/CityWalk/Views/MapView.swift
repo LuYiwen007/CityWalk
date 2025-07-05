@@ -12,19 +12,30 @@ struct MapView: View {
     let destinationLocation: CLLocationCoordinate2D?
     var routeCoordinates: [CLLocationCoordinate2D]? = nil // polyline
     var centerCoordinate: CLLocationCoordinate2D? = nil // 新增地图中心
+    // ====== 极端方案新增参数 ======
+    var navigationIndex: Int? = nil
+    var mockCoords: [CLLocationCoordinate2D]? = nil
+    // ==========================
     @State private var showRouteSheet: Bool = false
     @State private var mapViewId = UUID()
     
     // 已切换为高德地图，不再需要MapCameraPosition
     var body: some View {
-        print("[MapView] 渲染，startCoordinate=\(String(describing: startCoordinate))")
+        // 1. 外部传入的 startCoordinate
+        print("[MapView] 渲染，外部传入 startCoordinate=\(String(describing: startCoordinate))")
+        let currentCoord = startCoordinate
+        print("[MapView] body 内 currentCoord=\(String(describing: currentCoord))")
         return GeometryReader { geometry in
             ZStack(alignment: .bottom) {
-                // 用高德地图替换原有MapKit地图
-                AMapViewRepresentable(routeCoordinates: routeCoordinates, startCoordinate: startCoordinate, destination: destinationLocation, centerCoordinate: centerCoordinate)
-                    .id(mapViewId)
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                // 右上角自定义定位按钮和底部分界线等UI保留
+                AMapViewRepresentable(
+                    routeCoordinates: routeCoordinates,
+                    startCoordinate: currentCoord,
+                    destination: destinationLocation,
+                    centerCoordinate: centerCoordinate,
+                    navigationIndex: navigationIndex,
+                    mockCoords: mockCoords
+                )
+                .frame(width: geometry.size.width, height: geometry.size.height)
                 Rectangle()
                     .frame(height: 1)
                     .foregroundColor(Color(.systemGray4))

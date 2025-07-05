@@ -20,23 +20,29 @@ struct DemoNavigationPage: View {
     ]
     let route = RouteDetailView_Previews.mockRoute
     var body: some View {
-        print("[DemoNavigationPage] MapView 传参：navigationIndex=\(navigationIndex), startCoordinate=\(mockCoords[navigationIndex])")
+        let safeCoord = (navigationIndex >= 0 && navigationIndex < mockCoords.count) ? mockCoords[navigationIndex] : nil
+        print("[DemoNavigationPage] navigationIndex=\(navigationIndex), mockCoords[navigationIndex]=\(String(describing: safeCoord)), mapViewId=\(mapViewId)")
         return VStack(spacing: 0) {
-            if navigationIndex < mockCoords.count {
+            if let coord = safeCoord {
                 MapView(
                     isExpanded: $isExpanded,
                     isShowingProfile: $isShowingProfile,
-                    startCoordinate: mockCoords[navigationIndex],
+                    startCoordinate: coord,
                     destinationLocation: nil,
-                    routeCoordinates: nil
+                    routeCoordinates: nil,
+                    navigationIndex: navigationIndex,
+                    mockCoords: mockCoords
                 )
                 .frame(height: 350)
+            } else {
+                Text("无效的导航索引或经纬度").foregroundColor(.red)
             }
             // 路线详情卡片
             RouteDetailView(route: route)
             Button(action: {
                 if navigationIndex < mockCoords.count - 1 {
                     navigationIndex += 1
+                    mapViewId = UUID() // 每次都强制重建整个页面
                 }
             }) {
                 Text("开始/继续导航")
@@ -47,6 +53,7 @@ struct DemoNavigationPage: View {
                     .cornerRadius(10)
             }
         }
+        .id(mapViewId) // 关键：加在最外层VStack
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
     }
 }

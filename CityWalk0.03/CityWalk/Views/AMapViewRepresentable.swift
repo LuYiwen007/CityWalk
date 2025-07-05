@@ -16,13 +16,17 @@ struct AMapViewRepresentable: UIViewRepresentable {
     // 新增：搜索回调
     var onSearch: ((String) -> Void)? = nil
     var showSearchBar: Bool = true
+    // ====== 极端方案新增参数 ======
+    var navigationIndex: Int? = nil
+    var mockCoords: [CLLocationCoordinate2D]? = nil
+    // ==========================
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
     
     func makeUIView(context: Context) -> UIView {
-        print("[AMapViewRepresentable] makeUIView 被调用，startCoordinate类型=\(type(of: startCoordinate)), startCoordinate=\(String(describing: startCoordinate))")
+        print("[AMapViewRepresentable] makeUIView 被调用，startCoordinate类型=\(type(of: startCoordinate)), startCoordinate=\(String(describing: startCoordinate)), navigationIndex=\(String(describing: navigationIndex)), mockCoords=\(String(describing: mockCoords))")
         let container = UIView(frame: .zero)
         let mapView = MAMapView(frame: .zero)
         mapView.showsUserLocation = true
@@ -44,17 +48,24 @@ struct AMapViewRepresentable: UIViewRepresentable {
         locationManager.requestLocation(withReGeocode: false) { location, _, _ in
             if let loc = location {
                 print("[AMap] makeUIView 定位到当前位置：\(loc.coordinate)")
-                mapView.setCenter(loc.coordinate, animated: false)
+                // mapView.setCenter(loc.coordinate, animated: false) // 注释掉，避免覆盖 startCoordinate
             }
         }
-        // 只要 startCoordinate 不为 nil，就 setCenter 到该点，实现和天安门跳转一样的效果
-        if let start = startCoordinate {
-            print("[AMapViewRepresentable] setCenter 前，start=\(start)")
-            mapView.setCenter(start, animated: false)
-            print("[AMapViewRepresentable] setCenter 后，mapView.centerCoordinate=\(mapView.centerCoordinate)")
-        } else if let dest = destination {
-            print("[AMap] makeUIView setCenter destination=\(dest)")
-            mapView.setCenter(dest, animated: false)
+        // ====== 极端方案核心：直接用 mockCoords[navigationIndex] setCenter ======
+        if let idx = navigationIndex, let coords = mockCoords, idx >= 0, idx < coords.count {
+            let coord = coords[idx]
+            print("[AMapViewRepresentable] makeUIView setCenter 极端方案 coord=\(coord)")
+            mapView.setCenter(coord, animated: false)
+        } else {
+            // ====== 备份：原有写死/动态参数写法，后续可恢复 ======
+            // let testCoord = CLLocationCoordinate2D(latitude: 23.114778, longitude: 113.237434)
+            // print("[AMapViewRepresentable] makeUIView setCenter testCoord=\(testCoord)")
+            // mapView.setCenter(testCoord, animated: false)
+            // if let start = startCoordinate {
+            //     print("[AMapViewRepresentable] makeUIView setCenter 动态 start=\(start)")
+            //     mapView.setCenter(start, animated: false)
+            // }
+            // =====================================
         }
         mapView.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(mapView)
@@ -113,7 +124,7 @@ struct AMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        print("[AMap] updateUIView 被调用，startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination)), centerCoordinate=\(String(describing: centerCoordinate))")
+        print("[AMap] updateUIView 被调用，startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination)), centerCoordinate=\(String(describing: centerCoordinate)), navigationIndex=\(String(describing: navigationIndex)), mockCoords=\(String(describing: mockCoords))")
         guard let mapView = context.coordinator.mapView else { print("[AMap] updateUIView: mapView为nil"); return }
         mapView.removeOverlays(mapView.overlays)
         print("[地图] updateUIView: startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination)), centerCoordinate=\(String(describing: centerCoordinate)), 当前center=\(mapView.centerCoordinate), zoomLevel=\(mapView.zoomLevel)")
@@ -123,16 +134,12 @@ struct AMapViewRepresentable: UIViewRepresentable {
             mapView.add(polyline)
             print("[AMap] updateUIView add polyline, count=\(coords.count)")
         }
-        // 新增：每次 startCoordinate 变化都 setCenter
-        if let start = startCoordinate {
-            print("[AMap] updateUIView setCenter startCoordinate=\(start)")
-            mapView.setCenter(start, animated: false)
-        }
-        // 新增：根据centerCoordinate跳转地图中心
-        if let center = centerCoordinate {
+        // 只做轻量setCenter，不再新建mapView
+        if let idx = navigationIndex, let coords = mockCoords, idx >= 0, idx < coords.count {
+            let coord = coords[idx]
+            print("[AMapViewRepresentable] updateUIView setCenter 轻量 coord=\(coord)")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                print("[地图] setCenter(centerCoordinate) center=\(center)")
-                mapView.setCenter(center, animated: true)
+                mapView.setCenter(coord, animated: false)
             }
         }
         print("[AMap] updateUIView 结束")
