@@ -7,7 +7,7 @@ let samplePosts: [CommunityPostItem] = [
     CommunityPostItem(imageName: "Miyaluo", title: "米亚罗霸王山2日", authorName: "浪迹川西", authorImageName: "SuzhouGarden", likes: 45),
     CommunityPostItem(imageName: "Chengdu", title: "成都CityWalk路线推荐", authorName: "沙沙", authorImageName: "SuzhouGarden", likes: 20),
     CommunityPostItem(imageName: "Japan", title: "成都欢乐谷一日攻略", authorName: "匿名用户", authorImageName: "SuzhouGarden", likes: 99),
-    CommunityPostItem(imageName: "HangzhouWestlake", title: "千岛湖喜来登小红书首发", authorName: "喜来登", authorImageName: "SuzhouGarden", likes: 108),
+    CommunityPostItem(imageName: "HangzhouWestlake", title: "千岛湖喜来登CityWalk首发", authorName: "喜来登", authorImageName: "SuzhouGarden", likes: 108),
     CommunityPostItem(imageName: "SuzhouGarden", title: "苏州园林一日游", authorName: "江南梦", authorImageName: "SuzhouGarden", likes: 76),
     CommunityPostItem(imageName: "Japan", title: "富士山下的樱花", authorName: "东京爱情故事", authorImageName: "SuzhouGarden", likes: 520),
 ]
