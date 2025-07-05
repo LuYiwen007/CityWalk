@@ -30,6 +30,7 @@ struct MessageView: View {
     // 新增：用于地图和路线详情联动
     @State private var selectedPlaceIndex: Int = 0
     @State private var startCoordinate: CLLocationCoordinate2D? = nil
+    @State private var destinationLocation: CLLocationCoordinate2D? = nil
     
     // 主体视图，渲染聊天界面、消息列表、地图弹窗、输入区等
     var body: some View {
@@ -50,7 +51,7 @@ struct MessageView: View {
                         isShowingProfile: .constant(false),
                         sharedMapState: sharedMapState,
                         routeInfo: routeToShow,
-                        destinationLocation: nil,
+                        destinationLocation: $destinationLocation,
                         selectedPlaceIndex: $selectedPlaceIndex,
                         startCoordinateBinding: $startCoordinate
                     )
@@ -61,7 +62,7 @@ struct MessageView: View {
                         isExpanded: .constant(true),
                         isShowingProfile: .constant(false),
                         routeInfo: routeToShow,
-                        destinationLocation: nil,
+                        destinationLocation: $destinationLocation,
                         selectedPlaceIndex: $selectedPlaceIndex,
                         startCoordinateBinding: $startCoordinate
                     )

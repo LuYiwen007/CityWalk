@@ -37,6 +37,7 @@ struct RouteDetailView: View {
     }
 
     var body: some View {
+        let _ = print("[RouteDetailView] startCoordinate=\(String(describing: startCoordinate)), destinationLocation=\(String(describing: destinationLocation))")
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 16) {
                 // 标题
@@ -250,13 +251,28 @@ struct RouteDetailView: View {
                 // 新增"开始导航"按钮
                 Button(action: {
                     if navigationIndex == nil {
-                        // 开始第一段导航
+                        // 开始第一段路线
                         navigationIndex = 0
-                        startNavigation()
                     } else if let idx = navigationIndex, idx < places.count - 1 {
-                        // 继续下一段导航
+                        // 继续下一段路线
                         navigationIndex = idx + 1
-                        startNavigation()
+                    }
+                    // 直接设置起终点，触发地图步行路线绘制
+                    print("[按钮] navigationIndex=\(String(describing: navigationIndex)), places.count=\(places.count)")
+                    if let idx = navigationIndex, idx < places.count {
+                        let start = places[idx].coordinate
+                        let dest = places[idx].nextCoordinate
+                        print("[按钮] idx=\(idx), start=\(String(describing: start)), dest=\(String(describing: dest))")
+                        if let start = start, let dest = dest {
+                            startCoordinate = start
+                            destinationLocation = dest
+                            isNavigating = true
+                            print("[按钮] 已设置 startCoordinate=\(start), destinationLocation=\(dest)")
+                        } else {
+                            print("[按钮] start 或 dest 为空，无法绘制路线")
+                        }
+                    } else {
+                        print("[按钮] navigationIndex越界或无效")
                     }
                 }) {
                     HStack {
@@ -303,40 +319,7 @@ struct RouteDetailView: View {
         .padding(.horizontal, 16)
         .padding(.top, 24)
     }
-    // 导航逻辑：用POI名称查经纬度并发起导航
-    func startNavigation() {
-        guard let idx = navigationIndex, idx < places.count - 1 else { print("[导航] navigationIndex无效"); return }
-        isLoadingPOI = true
-        let fromName: String
-        if idx == 0 {
-            fromName = places[0].name
-        } else {
-            fromName = places[idx].name
-        }
-        let toName = places[idx + 1].name
-        print("[导航] startNavigation from=\(fromName) to=\(toName)")
-        AMapPOISearchHelper.searchPOI(keyword: fromName) { fromCoord in
-            print("[导航] 起点POI查找结果 from=\(fromName), coord=\(String(describing: fromCoord))")
-            guard let fromCoord = fromCoord else { isLoadingPOI = false; print("[导航] 起点查找失败"); return }
-            AMapPOISearchHelper.searchPOI(keyword: toName) { poiCoord in
-                print("[导航] 终点POI查找结果 to=\(toName), coord=\(String(describing: poiCoord))")
-                isLoadingPOI = false
-                if let destCoord = poiCoord {
-                    // 强制刷新地图组件
-                    startCoordinate = nil
-                    destinationLocation = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                        startCoordinate = fromCoord
-                        destinationLocation = destCoord
-                        print("[导航] 设置startCoordinate=\(fromCoord), destinationLocation=\(destCoord)")
-                        isNavigating = true
-                    }
-                } else {
-                    print("[导航] 终点查找失败")
-                }
-            }
-        }
-    }
+    // 移除 startNavigation 函数
 }
 
 // 辅助：定位代理

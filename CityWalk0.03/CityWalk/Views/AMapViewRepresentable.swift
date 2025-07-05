@@ -4,6 +4,12 @@ import AMapSearchKit
 import CoreLocation
 import AMapLocationKit
 
+extension CLLocationCoordinate2D: Equatable {
+    public static func == (lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
+        lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
+    }
+}
+
 struct AMapViewRepresentable: UIViewRepresentable {
     // 支持外部传入路线点串
     var routeCoordinates: [CLLocationCoordinate2D]?
@@ -34,6 +40,7 @@ struct AMapViewRepresentable: UIViewRepresentable {
         mapView.isScrollEnabled = true
         mapView.isZoomEnabled = true
         AMapServices.shared().enableHTTPS = true
+        AMapServices.shared().apiKey = "fe318d0463aac4edaa94170b858dd6a0"
         context.coordinator.mapView = mapView
         // 主动请求系统定位权限
         let clManager = CLLocationManager()
@@ -113,6 +120,7 @@ struct AMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
+        print("[AMapViewRepresentable] startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination))")
         print("[AMap] updateUIView 被调用，startCoordinate=\(String(describing: startCoordinate)), destination=\(String(describing: destination)), centerCoordinate=\(String(describing: centerCoordinate))")
         guard let mapView = context.coordinator.mapView else { print("[AMap] updateUIView: mapView为nil"); return }
         mapView.removeOverlays(mapView.overlays)
@@ -135,6 +143,14 @@ struct AMapViewRepresentable: UIViewRepresentable {
                 mapView.setCenter(center, animated: true)
             }
         }
+        // 自动触发步行路线规划
+        if let start = startCoordinate, let dest = destination {
+            if context.coordinator.lastRouteStart == nil || context.coordinator.lastRouteDest == nil || context.coordinator.lastRouteStart != start || context.coordinator.lastRouteDest != dest {
+                context.coordinator.lastRouteStart = start
+                context.coordinator.lastRouteDest = dest
+                context.coordinator.searchWalkingRoute(from: start, to: dest, on: mapView)
+            }
+        }
         print("[AMap] updateUIView 结束")
     }
 
@@ -149,6 +165,9 @@ struct AMapViewRepresentable: UIViewRepresentable {
         var currentAnnotation: MAPointAnnotation? = nil
         // 新增：缓存用户最新位置
         var latestUserLocation: CLLocationCoordinate2D?
+        // 新增：缓存上一次路线起终点，避免重复请求
+        var lastRouteStart: CLLocationCoordinate2D? = nil
+        var lastRouteDest: CLLocationCoordinate2D? = nil
         
         init(_ parent: AMapViewRepresentable) {
             self.parent = parent
